@@ -9,13 +9,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/black"
-        android:elevation="4dp">
+        android:elevation="4dp"
+        android:padding="10dp">
 
         <com.pablito203.plugins.gallerycapacitorplugin.RadioCheckView
             android:id="@+id/check_view_preview"
-            android:src="@drawable/ic_radio_on_foreground"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:src="@drawable/ic_radio_on"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
             android:layout_gravity="end"/>
     </FrameLayout>
 

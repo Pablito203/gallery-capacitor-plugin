@@ -17,7 +17,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingVertical="16dp"
-            android:drawableRight="@drawable/ic_arrow_drop_down_white_24dp"
+            android:drawableRight="@drawable/arrow_down_24"
             android:foreground="?selectableItemBackground"
             android:gravity="center"
             android:textSize="16sp"

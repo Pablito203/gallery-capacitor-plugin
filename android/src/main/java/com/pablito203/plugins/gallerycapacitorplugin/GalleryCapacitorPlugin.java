@@ -39,7 +39,6 @@ public class GalleryCapacitorPlugin extends Plugin {
             startActivityForResult(call, intent, "pickFilesResult");
         } catch (Exception ex) {
             String message = ex.getMessage();
-            Log.e(TAG, message);
             call.reject(message);
         }
     }
