@@ -1,0 +1,116 @@
+{
+  "api": {
+    "name": "GalleryCapacitorPlugin",
+    "slug": "gallerycapacitorplugin",
+    "docs": "",
+    "tags": [],
+    "methods": [
+      {
+        "name": "pickFiles",
+        "signature": "(options?: PickFilesOptions | undefined) => Promise<PickFilesResult>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "PickFilesOptions | undefined"
+          }
+        ],
+        "returns": "Promise<PickFilesResult>",
+        "tags": [
+          {
+            "name": "since",
+            "text": "0.5.3"
+          }
+        ],
+        "docs": "Pick one or more images from the gallery.\n\nOn iOS 13 and older it only allows to pick one image.\n\nOnly available on Android and iOS.",
+        "complexTypes": [
+          "PickFilesResult",
+          "PickFilesOptions"
+        ],
+        "slug": "pickfiles"
+      }
+    ],
+    "properties": []
+  },
+  "interfaces": [
+    {
+      "name": "PickFilesResult",
+      "slug": "pickfilesresult",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "files",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [
+            "PickedFile"
+          ],
+          "type": "PickedFile[]"
+        }
+      ]
+    },
+    {
+      "name": "PickedFile",
+      "slug": "pickedfile",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "mimeType",
+          "tags": [],
+          "docs": "The mime type of the file.",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "tags": [],
+          "docs": "The name of the file.",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "path",
+          "tags": [],
+          "docs": "The path of the file.\n\nOnly available on Android and iOS.",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "size",
+          "tags": [],
+          "docs": "The size of the file in bytes.",
+          "complexTypes": [],
+          "type": "number"
+        }
+      ]
+    },
+    {
+      "name": "PickFilesOptions",
+      "slug": "pickfilesoptions",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "maximumFilesCount",
+          "tags": [
+            {
+              "text": "15",
+              "name": "default"
+            }
+          ],
+          "docs": "Max files to be selected",
+          "complexTypes": [],
+          "type": "number | undefined"
+        }
+      ]
+    }
+  ],
+  "enums": [],
+  "typeAliases": [],
+  "pluginConfigs": []
+}
