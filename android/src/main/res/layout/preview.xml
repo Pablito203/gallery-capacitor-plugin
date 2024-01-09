@@ -8,15 +8,14 @@
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/black"
-        android:layout_above="@+id/bottom_toolbar_preview"/>
+        android:background="@android:color/black"/>
 
     <FrameLayout
         android:id="@+id/bottom_toolbar_preview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="#141517"
+        android:background="@android:color/transparent"
         android:elevation="4dp">
 
         <TextView
@@ -42,7 +41,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:foreground="?selectableItemBackground"
-                android:text="Avançar"
+                android:text="Salvar"
                 android:paddingEnd="5dp"
                 android:textSize="16sp"
                 android:textColor="@android:color/white"/>

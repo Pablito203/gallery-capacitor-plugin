@@ -1,12 +1,16 @@
 package com.pablito203.plugins.gallerycapacitorplugin;
 
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -19,34 +23,43 @@ import java.util.ArrayList;
 
 public class PreviewActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private TextView buttonVoltar;
+    private TextView buttonBack;
+    private LinearLayout buttonApply;
+    private TextView countSelectedTextView;
     private final ImageFetcher fetcher = new ImageFetcher();
-    private ArrayList<Integer> lstImageIDSelected = new ArrayList();
-    private ArrayList<Integer> lstImageRotateSelected = new ArrayList();
+    private ArrayList<SelectedFile> selectedFiles = new ArrayList();
+    private ArrayList<Integer> lstImageIDRemoved = new ArrayList();
     private ViewPager2 viewPager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        lstImageIDSelected = getIntent().getIntegerArrayListExtra("lstImageIDSelected");
-        lstImageRotateSelected = getIntent().getIntegerArrayListExtra("lstImageRotateSelected");
+        Intent intent = this.getIntent();
+
+        selectedFiles = intent.getParcelableArrayListExtra("selectedFiles");
 
         setContentView(R.layout.preview);
         setupHeader();
 
         ArrayList<ViewPagerItem> viewPagerItemArrayList = new ArrayList<>();
 
-        for (int i = 0; i < lstImageIDSelected.size(); i++) {
-            ViewPagerItem viewPagerItem = new ViewPagerItem(lstImageIDSelected.get(i), lstImageRotateSelected.get(i));
+        for (int i = 0; i < selectedFiles.size(); i++) {
+            ViewPagerItem viewPagerItem = new ViewPagerItem(selectedFiles.get(i).imageID, selectedFiles.get(i).imageRotate);
             viewPagerItemArrayList.add(viewPagerItem);
         }
         viewPager = findViewById(R.id.pager);
         ViewPageAdapter pagerAdapter = new ViewPageAdapter(viewPagerItemArrayList);
         viewPager.setAdapter(pagerAdapter);
 
-        buttonVoltar = findViewById(R.id.button_back);
-        buttonVoltar.setOnClickListener(this);
+        buttonBack = findViewById(R.id.button_back);
+        buttonBack.setOnClickListener(this);
+
+        buttonApply = findViewById(R.id.button_apply_preview);
+        buttonApply.setOnClickListener(this);
+
+        countSelectedTextView = findViewById(R.id.count_selected_preview);
+        countSelectedTextView.setText(String.format("(%d)", selectedFiles.size()));
     }
 
     private void setupHeader() {
@@ -60,6 +73,12 @@ public class PreviewActivity extends AppCompatActivity implements View.OnClickLi
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.button_back) {
+            setResult(RESULT_CANCELED);
+            finish();
+        } else if (v.getId() == R.id.button_apply_preview) {
+            Intent result = new Intent();
+            result.putIntegerArrayListExtra("lstImageIDRemoved", lstImageIDRemoved);
+            setResult(RESULT_OK, result);
             finish();
         }
     }
@@ -83,8 +102,15 @@ public class PreviewActivity extends AppCompatActivity implements View.OnClickLi
 
             holder.imageID = viewPagerItem.imageID;
             holder.imageRotate = viewPagerItem.imageRotate;
-            holder.checked = viewPagerItem.checked;
-            fetcher.fetch(holder.imageID, holder.thumbnail, 0, holder.imageRotate);
+            if (holder.checked != viewPagerItem.checked) {
+                holder.checked = viewPagerItem.checked;
+                holder.radioCheckView.setChecked(holder.checked);
+            }
+
+            String stringr = MediaStore.Images.Media.EXTERNAL_CONTENT_URI.toString() + String.format("/%d", holder.imageID);
+
+            Uri imgUri=Uri.parse(stringr);
+            holder.thumbnail.setImageURI(imgUri);
         }
 
         @Override
@@ -111,6 +137,16 @@ public class PreviewActivity extends AppCompatActivity implements View.OnClickLi
                 if (v.getId() == R.id.check_view_preview) {
                     checked = !checked;
                     this.radioCheckView.setChecked(checked);
+
+                    if (checked) {
+                        int index = lstImageIDRemoved.indexOf(imageID);
+                        lstImageIDRemoved.remove(index);
+                    } else {
+                        lstImageIDRemoved.add(imageID);
+                    }
+
+                    int countSelected = selectedFiles.size() - lstImageIDRemoved.size();
+                    countSelectedTextView.setText(String.format("(%d)", countSelected));
                 }
             }
         }

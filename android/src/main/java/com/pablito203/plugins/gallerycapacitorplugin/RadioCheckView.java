@@ -7,9 +7,6 @@ import android.util.AttributeSet;
 import androidx.appcompat.widget.AppCompatImageView;
 
 public class RadioCheckView extends AppCompatImageView {
-
-    private Drawable mDrawable;
-
     public RadioCheckView(Context context) {
         super(context);
     }
@@ -20,9 +17,9 @@ public class RadioCheckView extends AppCompatImageView {
 
     public void setChecked(boolean enable) {
         if (enable) {
-            setImageResource(R.drawable.ic_radio_on_foreground);
+            setImageResource(R.drawable.ic_radio_on);
         } else {
-            setImageResource(R.drawable.ic_radio_off_foreground);
+            setImageResource(R.drawable.ic_radio_off);
         }
     }
 }

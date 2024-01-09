@@ -3,6 +3,7 @@ package com.pablito203.plugins.gallerycapacitorplugin;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import androidx.activity.result.ActivityResult;
@@ -70,26 +71,18 @@ public class GalleryCapacitorPlugin extends Plugin {
 
     private JSObject createPickFilesResult(@Nullable Intent data) {
         JSObject callResult = new JSObject();
-        List<JSObject> filesResultList = new ArrayList<>();
+        List<JSObject> filesResultList = new ArrayList();
         if (data == null) {
             callResult.put("files", JSArray.from(filesResultList));
             return callResult;
         }
-        List<Uri> uris = new ArrayList<>();
-        if (data.getClipData() == null) {
-            Uri uri = data.getData();
-            uris.add(uri);
-        } else {
-            for (int i = 0; i < data.getClipData().getItemCount(); i++) {
-                Uri uri = data.getClipData().getItemAt(i).getUri();
-                uris.add(uri);
-            }
-        }
-        for (int i = 0; i < uris.size(); i++) {
-            Uri uri = uris.get(i);
-            if (uri == null) {
-                continue;
-            }
+
+        ArrayList<Integer> lstImageID = data.getIntegerArrayListExtra("lstImageID");
+
+        for (int i = 0; i < lstImageID.size(); i++) {
+            String stringr = MediaStore.Images.Media.EXTERNAL_CONTENT_URI.toString() + String.format("/%d", lstImageID.get(i));
+
+            Uri uri = Uri.parse(stringr);
             JSObject fileResult = new JSObject();
 
             fileResult.put("mimeType", implementation.getMimeTypeFromUri(uri));
