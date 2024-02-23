@@ -1,8 +1,9 @@
 package com.pablito203.plugins.gallerycapacitorplugin;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.net.Uri;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
@@ -19,6 +20,9 @@ import androidx.appcompat.widget.AppCompatImageView;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
+
 import java.util.ArrayList;
 
 public class PreviewActivity extends AppCompatActivity implements View.OnClickListener {
@@ -26,7 +30,6 @@ public class PreviewActivity extends AppCompatActivity implements View.OnClickLi
     private TextView buttonBack;
     private LinearLayout buttonApply;
     private TextView countSelectedTextView;
-    private final ImageFetcher fetcher = new ImageFetcher();
     private ArrayList<SelectedFile> selectedFiles = new ArrayList();
     private ArrayList<Integer> lstImageIDRemoved = new ArrayList();
     private ViewPager2 viewPager;
@@ -45,9 +48,10 @@ public class PreviewActivity extends AppCompatActivity implements View.OnClickLi
         ArrayList<ViewPagerItem> viewPagerItemArrayList = new ArrayList<>();
 
         for (int i = 0; i < selectedFiles.size(); i++) {
-            ViewPagerItem viewPagerItem = new ViewPagerItem(selectedFiles.get(i).imageID, selectedFiles.get(i).imageRotate);
+            ViewPagerItem viewPagerItem = new ViewPagerItem(selectedFiles.get(i).imageID);
             viewPagerItemArrayList.add(viewPagerItem);
         }
+
         viewPager = findViewById(R.id.pager);
         ViewPageAdapter pagerAdapter = new ViewPageAdapter(viewPagerItemArrayList);
         viewPager.setAdapter(pagerAdapter);
@@ -101,16 +105,31 @@ public class PreviewActivity extends AppCompatActivity implements View.OnClickLi
             ViewPagerItem viewPagerItem = viewPagerItemArrayList.get(position);
 
             holder.imageID = viewPagerItem.imageID;
-            holder.imageRotate = viewPagerItem.imageRotate;
             if (holder.checked != viewPagerItem.checked) {
                 holder.checked = viewPagerItem.checked;
                 holder.radioCheckView.setChecked(holder.checked);
             }
 
-            String stringr = MediaStore.Images.Media.EXTERNAL_CONTENT_URI.toString() + String.format("/%d", holder.imageID);
+            Target mTarget = new Target() {
+                @Override
+                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                    if (bitmap == null) {
+                    } else {
+                        holder.thumbnail.setImageBitmap(bitmap);
+                    }
+                }
 
-            Uri imgUri=Uri.parse(stringr);
-            holder.thumbnail.setImageURI(imgUri);
+                @Override
+                public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+                }
+
+                @Override
+                public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+                }
+            };
+
+            Picasso.get().load(viewPagerItem.imagePath).resize(1920, 0).priority(Picasso.Priority.NORMAL).into(mTarget);
         }
 
         @Override
@@ -123,7 +142,7 @@ public class PreviewActivity extends AppCompatActivity implements View.OnClickLi
             private AppCompatImageView thumbnail;
             private boolean checked = true;
             private int imageID = 0;
-            private int imageRotate = 0;
+
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
 
@@ -154,12 +173,12 @@ public class PreviewActivity extends AppCompatActivity implements View.OnClickLi
 
     public class ViewPagerItem {
         private boolean checked = true;
-        private int imageID = 0;
-        private int imageRotate = 0;
+        private int imageID;
+        private String imagePath;
 
-        public ViewPagerItem(int imageID, int imageRotate) {
+        public ViewPagerItem(int imageID) {
             this.imageID = imageID;
-            this.imageRotate = imageRotate;
+            this.imagePath = MediaStore.Images.Media.EXTERNAL_CONTENT_URI.toString() + "/" + imageID;
         }
     }
 }

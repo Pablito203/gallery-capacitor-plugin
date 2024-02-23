@@ -51,6 +51,7 @@ public class GalleryActivity extends AppCompatActivity implements OnItemClickLis
     private final ImageFetcher fetcher = new ImageFetcher();
     private boolean shouldRequestThumb = true;
     private Map<Integer, SelectedFile> selectedFiles = new HashMap<Integer, SelectedFile>();
+    private ArrayList<Integer> lstImageID = new ArrayList();
 
     private SparseBooleanArray checkStatus = new SparseBooleanArray();
     private TextView countSelectedTextView;
@@ -66,6 +67,10 @@ public class GalleryActivity extends AppCompatActivity implements OnItemClickLis
 
         setContentView(R.layout.grid);
         setupHeader();
+
+        if (maximumFilesCount == 1) {
+            findViewById(R.id.bottom_toolbar).setVisibility(View.GONE);
+        }
 
         Display display = getWindowManager().getDefaultDisplay();
         int width = display.getWidth();
@@ -134,7 +139,7 @@ public class GalleryActivity extends AppCompatActivity implements OnItemClickLis
 
         boolean isChecked = !isChecked(position);
 
-        if (isChecked && selectedFiles.size() >= maximumFilesCount) {
+        if (isChecked && maximumFilesCount > 1 && selectedFiles.size() >= maximumFilesCount) {
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
             dialogBuilder.setTitle(String.format("Limite de %d arquivos", maximumFilesCount));
             dialogBuilder.setMessage(String.format("Você pode selecionar até %d arquivos", maximumFilesCount));
@@ -143,31 +148,42 @@ public class GalleryActivity extends AppCompatActivity implements OnItemClickLis
                     dialog.cancel();
                 }
             });
-            dialogBuilder.create();
-            dialogBuilder.show();
+            AlertDialog dialog = dialogBuilder.create();
+            dialog.show();
+            dialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(Color.parseColor("#E39730"));
             return;
         } else if (isChecked) {
             SelectedFile selectedFile = new SelectedFile(idCursor, rotation, position, name);
             selectedFiles.put(idCursor, selectedFile);
+            lstImageID.add(idCursor);
 
-            if (3 == 1) {
-                //selectClicked();
-
+            if (maximumFilesCount == 1) {
+                applyClicked();
+                return;
             } else {
                 ImageGridView imageGridView = (ImageGridView) view;
 
                 imageGridView.thumbnail.setImageAlpha(128);
                 imageGridView.thumbnail.setBackgroundColor(Color.BLACK);
                 imageGridView.radioCheckView.setChecked(true);
+
+                buttonPreview.setVisibility(View.VISIBLE);
             }
         } else {
             selectedFiles.remove(idCursor);
+            int index = lstImageID.indexOf(idCursor);
+            lstImageID.remove(index);
+
 
             ImageGridView imageGridView = (ImageGridView) view;
 
             imageGridView.thumbnail.setImageAlpha(255);
             imageGridView.thumbnail.setBackgroundColor(Color.TRANSPARENT);
             imageGridView.radioCheckView.setChecked(false);
+
+            if (selectedFiles.size() == 0) {
+                buttonPreview.setVisibility(View.GONE);
+            }
         }
 
         checkStatus.put(position, isChecked);
@@ -256,17 +272,27 @@ public class GalleryActivity extends AppCompatActivity implements OnItemClickLis
     public void onClick(View v) {
         if (v.getId() == R.id.button_preview) {
 
-            ArrayList<SelectedFile> lstSelectedFiles = new ArrayList(selectedFiles.values());
+            ArrayList<SelectedFile> lstSelectedFiles = new ArrayList();
+
+            for (int i = 0; i < selectedFiles.size(); i++) {
+                lstSelectedFiles.add(selectedFiles.get(lstImageID.get(i)));
+            }
+
             Intent intent = new Intent(this, PreviewActivity.class);
             intent.putParcelableArrayListExtra("selectedFiles", lstSelectedFiles);;
             startActivityForResult(intent, ACTIVITY_PREVIEW);
         } else if (v.getId() == R.id.button_apply) {
-            Intent result = new Intent();
-            ArrayList<Integer> lstImageID = new ArrayList<>(selectedFiles.keySet());
-            result.putIntegerArrayListExtra("lstImageID", lstImageID);
-            setResult(RESULT_OK, result);
-            finish();
+            applyClicked();
         }
+    }
+
+    private void applyClicked() {
+        Intent result = new Intent();
+        ArrayList<Integer> lstImageID = new ArrayList<>(selectedFiles.keySet());
+        result.putIntegerArrayListExtra("lstImageID", lstImageID);
+
+        setResult(RESULT_OK, result);
+        finish();
     }
 
     @Override
@@ -301,6 +327,10 @@ public class GalleryActivity extends AppCompatActivity implements OnItemClickLis
                 checkStatus.put(selectedFile.gridPosition, false);
 
                 selectedFiles.remove(imageID);
+            }
+
+            if (selectedFiles.size() == 0) {
+                buttonPreview.setVisibility(View.GONE);
             }
         }
     }
@@ -342,6 +372,7 @@ public class GalleryActivity extends AppCompatActivity implements OnItemClickLis
         }
 
         public long getItemId(int position) {
+
             return position;
         }
 

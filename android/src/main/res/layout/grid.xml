@@ -42,7 +42,8 @@
             android:padding="16dp"
             android:text="Prévia"
             android:textSize="16sp"
-            android:textColor="@android:color/white"/>
+            android:textColor="@android:color/white"
+            android:visibility="gone"/>
 
         <LinearLayout
             android:id="@+id/button_apply"
