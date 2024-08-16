@@ -48,7 +48,8 @@ public class PreviewActivity extends AppCompatActivity implements View.OnClickLi
         ArrayList<ViewPagerItem> viewPagerItemArrayList = new ArrayList<>();
 
         for (int i = 0; i < selectedFiles.size(); i++) {
-            ViewPagerItem viewPagerItem = new ViewPagerItem(selectedFiles.get(i).imageID);
+            SelectedFile selectedFile = selectedFiles.get(i);
+            ViewPagerItem viewPagerItem = new ViewPagerItem(selectedFile.imageID);
             viewPagerItemArrayList.add(viewPagerItem);
         }
 
@@ -113,8 +114,7 @@ public class PreviewActivity extends AppCompatActivity implements View.OnClickLi
             Target mTarget = new Target() {
                 @Override
                 public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                    if (bitmap == null) {
-                    } else {
+                    if (bitmap != null) {
                         holder.thumbnail.setImageBitmap(bitmap);
                     }
                 }
@@ -128,8 +128,13 @@ public class PreviewActivity extends AppCompatActivity implements View.OnClickLi
 
                 }
             };
+            holder.itemView.setTag(mTarget);
 
-            Picasso.get().load(viewPagerItem.imagePath).resize(1920, 0).priority(Picasso.Priority.NORMAL).into(mTarget);
+            Picasso.get()
+                    .load(viewPagerItem.imagePath)
+                    .resize(1920, 0)
+                    .priority(Picasso.Priority.NORMAL)
+                    .into(mTarget);
         }
 
         @Override

@@ -279,7 +279,7 @@ public class GalleryActivity extends AppCompatActivity implements OnItemClickLis
             }
 
             Intent intent = new Intent(this, PreviewActivity.class);
-            intent.putParcelableArrayListExtra("selectedFiles", lstSelectedFiles);;
+            intent.putParcelableArrayListExtra("selectedFiles", lstSelectedFiles);
             startActivityForResult(intent, ACTIVITY_PREVIEW);
         } else if (v.getId() == R.id.button_apply) {
             applyClicked();
@@ -327,6 +327,8 @@ public class GalleryActivity extends AppCompatActivity implements OnItemClickLis
                 checkStatus.put(selectedFile.gridPosition, false);
 
                 selectedFiles.remove(imageID);
+                int indexImageID = lstImageID.indexOf(imageID);
+                lstImageID.remove(indexImageID);
             }
 
             if (selectedFiles.size() == 0) {
