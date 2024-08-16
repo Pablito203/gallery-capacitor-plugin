@@ -7,13 +7,11 @@ import androidx.annotation.NonNull;
 
 public class SelectedFile implements Parcelable {
     public int imageID;
-    public int imageRotate;
     public int gridPosition;
     public String fileName;
 
     SelectedFile(int imageID, int imageRotate, int gridPosition, String fileName) {
         this.imageID = imageID;
-        this.imageRotate = imageRotate;
         this.gridPosition = gridPosition;
         this.fileName = fileName;
     }
@@ -26,7 +24,6 @@ public class SelectedFile implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(imageID);
-        dest.writeInt(imageRotate);
         dest.writeInt(gridPosition);
         dest.writeString(fileName);
     }
@@ -46,7 +43,6 @@ public class SelectedFile implements Parcelable {
 
     public SelectedFile(Parcel data) {
         this.imageID = data.readInt();
-        this.imageRotate = data.readInt();
         this.gridPosition = data.readInt();
         this.fileName = data.readString();
     }
