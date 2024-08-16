@@ -57,6 +57,7 @@ public class PreviewActivity extends AppCompatActivity implements View.OnClickLi
         }
 
         viewPager = findViewById(R.id.pager);
+        viewPager.setOffscreenPageLimit(15);
         ViewPageAdapter pagerAdapter = new ViewPageAdapter(viewPagerItemArrayList);
         viewPager.setAdapter(pagerAdapter);
 
@@ -109,6 +110,8 @@ public class PreviewActivity extends AppCompatActivity implements View.OnClickLi
             ViewPagerItem viewPagerItem = viewPagerItemArrayList.get(position);
 
             holder.imageID = viewPagerItem.imageID;
+            holder.positionList = (int)position;
+
             if (holder.checked != viewPagerItem.checked) {
                 holder.checked = viewPagerItem.checked;
                 holder.radioCheckView.setChecked(holder.checked);
@@ -151,6 +154,7 @@ public class PreviewActivity extends AppCompatActivity implements View.OnClickLi
             private AppCompatImageView thumbnail;
             private boolean checked = true;
             private int imageID = 0;
+            private int positionList = 0;
 
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
@@ -164,6 +168,9 @@ public class PreviewActivity extends AppCompatActivity implements View.OnClickLi
             public void onClick(View v) {
                 if (v.getId() == R.id.check_view_preview) {
                     checked = !checked;
+                    ViewPagerItem viewPagerItem = viewPagerItemArrayList.get(positionList);
+                    viewPagerItem.checked = checked;
+
                     this.radioCheckView.setChecked(checked);
 
                     if (checked) {
