@@ -1,9 +1,12 @@
 package com.pablito203.plugins.gallerycapacitorplugin;
 
+import static android.provider.MediaStore.Images;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
@@ -133,6 +136,7 @@ public class PreviewActivity extends AppCompatActivity implements View.OnClickLi
             Picasso.get()
                     .load(viewPagerItem.imagePath)
                     .resize(1920, 0)
+                    .rotate(viewPagerItem.exifOrientation)
                     .priority(Picasso.Priority.NORMAL)
                     .into(mTarget);
         }
@@ -180,10 +184,22 @@ public class PreviewActivity extends AppCompatActivity implements View.OnClickLi
         private boolean checked = true;
         private int imageID;
         private String imagePath;
+        private int exifOrientation;
 
         public ViewPagerItem(int imageID) {
             this.imageID = imageID;
             this.imagePath = MediaStore.Images.Media.EXTERNAL_CONTENT_URI.toString() + "/" + imageID;
+            this.exifOrientation = this.getExifOrientation();
+        }
+
+        public int getExifOrientation() {
+            Uri uri = Uri.parse(this.imagePath);
+            String[] projection = { Images.ImageColumns.ORIENTATION };
+            Cursor cursor = PreviewActivity.this.getContentResolver().query(uri, projection, null, null, null);
+            if (cursor == null || !cursor.moveToFirst()) {
+                return 0;
+            }
+            return cursor.getInt(0);
         }
     }
 }
