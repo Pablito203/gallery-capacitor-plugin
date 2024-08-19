@@ -22,7 +22,7 @@
             "text": "0.5.3"
           }
         ],
-        "docs": "Pick one or more images from the gallery.\n\nOn iOS 13 and older it only allows to pick one image.\n\nOnly available on Android and iOS.",
+        "docs": "Pick one or more images from the gallery.\r\n\r\nOn iOS 13 and older it only allows to pick one image.\r\n\r\nOnly available on Android and iOS.",
         "complexTypes": [
           "PickFilesResult",
           "PickFilesOptions"
@@ -75,7 +75,7 @@
         {
           "name": "path",
           "tags": [],
-          "docs": "The path of the file.\n\nOnly available on Android and iOS.",
+          "docs": "The path of the file.\r\n\r\nOnly available on Android and iOS.",
           "complexTypes": [],
           "type": "string | undefined"
         },
