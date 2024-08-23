@@ -5,25 +5,42 @@
     android:layout_width="fill_parent"
     android:orientation="vertical" >
 
-    <androidx.appcompat.widget.Toolbar
+    <LinearLayout
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#141517"
+        android:orientation="horizontal"
         android:elevation="4dp">
 
         <TextView
-            android:id="@+id/selected_album"
-            android:layout_width="wrap_content"
+            android:id="@+id/images_button"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:paddingVertical="16dp"
-            android:drawableRight="@drawable/arrow_down_24"
             android:foreground="?selectableItemBackground"
             android:gravity="center"
             android:textSize="16sp"
-            android:text="All"
-            android:textColor="@android:color/white"/>
-    </androidx.appcompat.widget.Toolbar>
+            android:text="Imagens"
+            android:textColor="@android:color/white"
+            android:padding="16dp" />
+
+        <TextView
+            android:id="@+id/albuns_button"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:paddingVertical="16dp"
+            android:foreground="?selectableItemBackground"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:text="Álbuns"
+            android:textColor="@android:color/darker_gray"
+            android:layout_gravity="end"
+            android:padding="16dp"/>
+
+    </LinearLayout>
 
     <FrameLayout
         android:id="@+id/bottom_toolbar"
@@ -73,7 +90,7 @@
     </FrameLayout>
 
     <GridView
-        android:id="@+id/gridview"
+        android:id="@+id/gridview_images"
         android:layout_above="@id/bottom_toolbar"
         android:layout_below="@id/toolbar"
         android:layout_width="match_parent"

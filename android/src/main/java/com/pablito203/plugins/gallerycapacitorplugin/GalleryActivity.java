@@ -17,7 +17,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.GridView;
@@ -32,15 +31,18 @@ import androidx.loader.app.LoaderManager;
 import androidx.loader.content.CursorLoader;
 import androidx.loader.content.Loader;
 
+import com.pablito203.plugins.gallerycapacitorplugin.Utils.Projections;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class GalleryActivity extends AppCompatActivity implements OnItemClickListener,
-        LoaderManager.LoaderCallbacks<Cursor>,
-        View.OnClickListener {
+public class GalleryActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int CURSORLOADER_THUMBS = 0;
+    private static final int CURSORLOADER_ALBUNS = 1;
+    private static final int CURSORLOADER_THUMBS_ALBUM = 2;
+
     private static final int ACTIVITY_PREVIEW = 1;
 
 
@@ -54,10 +56,14 @@ public class GalleryActivity extends AppCompatActivity implements OnItemClickLis
     private ArrayList<Integer> lstImageID = new ArrayList();
 
     private SparseBooleanArray checkStatus = new SparseBooleanArray();
+
+    private TextView buttonImages;
+    private TextView buttonAlbuns;
     private TextView countSelectedTextView;
     private TextView buttonPreview;
     private LinearLayout buttonApply;
-    private GridView gridView;
+
+    private GridView gridViewImages;
     int maximumFilesCount;
 
     @Override
@@ -65,7 +71,7 @@ public class GalleryActivity extends AppCompatActivity implements OnItemClickLis
         super.onCreate(savedInstanceState);
         maximumFilesCount = getIntent().getIntExtra("maximumFilesCount", 15);
 
-        setContentView(R.layout.grid);
+        setContentView(R.layout.gallery_activity);
         setupHeader();
 
         if (maximumFilesCount == 1) {
@@ -79,13 +85,129 @@ public class GalleryActivity extends AppCompatActivity implements OnItemClickLis
 
         countSelectedTextView = (TextView) findViewById(R.id.count_selected);
         buttonPreview = (TextView) findViewById(R.id.button_preview);
-        buttonPreview.setOnClickListener(this);
         buttonApply = (LinearLayout) findViewById(R.id.button_apply);
-        buttonApply.setOnClickListener(this);
+        buttonImages = (TextView) findViewById(R.id.images_button);
+        buttonAlbuns = (TextView) findViewById(R.id.albuns_button);
+        this.setOnClickListener();
 
-        gridView = (GridView) findViewById(R.id.gridview);
-        gridView.setOnItemClickListener(this);
-        gridView.setOnScrollListener(new AbsListView.OnScrollListener() {
+        this.setGridViewImages();
+
+        LoaderManager.enableDebugLogging(false);
+        LoaderManager.getInstance(this).initLoader(CURSORLOADER_THUMBS, null, this);
+    }
+
+    private void setupHeader() {
+        getSupportActionBar().hide();
+        Window window = this.getWindow();
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(Color.BLACK);
+    }
+
+    private void setOnClickListener() {
+        buttonPreview.setOnClickListener(v -> {
+            ArrayList<SelectedFile> lstSelectedFiles = new ArrayList();
+
+            for (int i = 0; i < selectedFiles.size(); i++) {
+                lstSelectedFiles.add(selectedFiles.get(lstImageID.get(i)));
+            }
+
+            Intent intent = new Intent(GalleryActivity.this, PreviewActivity.class);
+            intent.putParcelableArrayListExtra("selectedFiles", lstSelectedFiles);
+            startActivityForResult(intent, ACTIVITY_PREVIEW);
+        });
+
+        buttonApply.setOnClickListener(v -> applyClicked());
+
+        buttonImages.setOnClickListener(v -> {
+            buttonImages.setTextColor(Color.WHITE);
+            buttonAlbuns.setTextColor(Color.DKGRAY);
+            gridViewImages.setVisibility(View.VISIBLE);
+        });
+
+        buttonAlbuns.setOnClickListener(v -> {
+            buttonAlbuns.setTextColor(Color.WHITE);
+            buttonImages.setTextColor(Color.DKGRAY);
+            gridViewImages.setVisibility(View.INVISIBLE);
+        });
+    }
+
+    private void setGridViewImages() {
+        gridViewImages = (GridView) findViewById(R.id.gridview_images);
+        this.setOnItemClickGridViewImages();
+        this.setScrollListenerGridViewImages();
+
+        imageAdapter = new ImageAdapter();
+        gridViewImages.setAdapter(imageAdapter);
+    }
+
+    private void setOnItemClickGridViewImages() {
+        gridViewImages.setOnItemClickListener((AdapterView<?> parent, View view, int position, long id) -> {
+            String name = getImageName(position);
+            int rotation = getImageRotation(position);
+            int idCursor = imagecursor.getInt(image_column_index);
+
+            if (name == null) {
+                return;
+            }
+
+            boolean isChecked = !isChecked(idCursor);
+
+            if (isChecked && maximumFilesCount > 1 && selectedFiles.size() >= maximumFilesCount) {
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+                dialogBuilder.setTitle(String.format("Limite de %d arquivos", maximumFilesCount));
+                dialogBuilder.setMessage(String.format("Você pode selecionar até %d arquivos", maximumFilesCount));
+                dialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                AlertDialog dialog = dialogBuilder.create();
+                dialog.show();
+                dialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(Color.parseColor("#E39730"));
+                return;
+            } else if (isChecked) {
+                SelectedFile selectedFile = new SelectedFile(idCursor, rotation, position, name);
+                selectedFiles.put(idCursor, selectedFile);
+                lstImageID.add(idCursor);
+
+                if (maximumFilesCount == 1) {
+                    applyClicked();
+                    return;
+                } else {
+                    ImageGridView imageGridView = (ImageGridView) view;
+
+                    imageGridView.thumbnail.setImageAlpha(128);
+                    imageGridView.thumbnail.setBackgroundColor(Color.BLACK);
+                    imageGridView.radioCheckView.setChecked(true);
+
+                    buttonPreview.setVisibility(View.VISIBLE);
+                }
+            } else {
+                selectedFiles.remove(idCursor);
+                int index = lstImageID.indexOf(idCursor);
+                lstImageID.remove(index);
+
+
+                ImageGridView imageGridView = (ImageGridView) view;
+
+                imageGridView.thumbnail.setImageAlpha(255);
+                imageGridView.thumbnail.setBackgroundColor(Color.TRANSPARENT);
+                imageGridView.radioCheckView.setChecked(false);
+
+                if (selectedFiles.size() == 0) {
+                    buttonPreview.setVisibility(View.GONE);
+                }
+            }
+
+            checkStatus.put(idCursor, isChecked);
+
+            countSelectedTextView.setText(String.format("(%d)", selectedFiles.size()));
+        });
+    }
+
+    private void setScrollListenerGridViewImages() {
+        gridViewImages.setOnScrollListener(new AbsListView.OnScrollListener() {
             private int lastFirstItem = 0;
             private long timestamp = System.currentTimeMillis();
 
@@ -110,104 +232,37 @@ public class GalleryActivity extends AppCompatActivity implements OnItemClickLis
                 }
             }
         });
-
-        imageAdapter = new ImageAdapter();
-        gridView.setAdapter(imageAdapter);
-
-        LoaderManager.enableDebugLogging(false);
-        LoaderManager.getInstance(this).initLoader(CURSORLOADER_THUMBS, null, this);
-    }
-
-    private void setupHeader() {
-        getSupportActionBar().hide();
-        Window window = this.getWindow();
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(Color.BLACK);
-    }
-
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        String name = getImageName(position);
-        int rotation = getImageRotation(position);
-        int idCursor = imagecursor.getInt(image_column_index);
-
-        if (name == null) {
-            return;
-        }
-
-        boolean isChecked = !isChecked(position);
-
-        if (isChecked && maximumFilesCount > 1 && selectedFiles.size() >= maximumFilesCount) {
-            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-            dialogBuilder.setTitle(String.format("Limite de %d arquivos", maximumFilesCount));
-            dialogBuilder.setMessage(String.format("Você pode selecionar até %d arquivos", maximumFilesCount));
-            dialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.cancel();
-                }
-            });
-            AlertDialog dialog = dialogBuilder.create();
-            dialog.show();
-            dialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(Color.parseColor("#E39730"));
-            return;
-        } else if (isChecked) {
-            SelectedFile selectedFile = new SelectedFile(idCursor, rotation, position, name);
-            selectedFiles.put(idCursor, selectedFile);
-            lstImageID.add(idCursor);
-
-            if (maximumFilesCount == 1) {
-                applyClicked();
-                return;
-            } else {
-                ImageGridView imageGridView = (ImageGridView) view;
-
-                imageGridView.thumbnail.setImageAlpha(128);
-                imageGridView.thumbnail.setBackgroundColor(Color.BLACK);
-                imageGridView.radioCheckView.setChecked(true);
-
-                buttonPreview.setVisibility(View.VISIBLE);
-            }
-        } else {
-            selectedFiles.remove(idCursor);
-            int index = lstImageID.indexOf(idCursor);
-            lstImageID.remove(index);
-
-
-            ImageGridView imageGridView = (ImageGridView) view;
-
-            imageGridView.thumbnail.setImageAlpha(255);
-            imageGridView.thumbnail.setBackgroundColor(Color.TRANSPARENT);
-            imageGridView.radioCheckView.setChecked(false);
-
-            if (selectedFiles.size() == 0) {
-                buttonPreview.setVisibility(View.GONE);
-            }
-        }
-
-        checkStatus.put(position, isChecked);
-
-        countSelectedTextView.setText(String.format("(%d)", selectedFiles.size()));
-        //updateAcceptButton();
     }
 
     @NonNull
     @Override
     public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
-        ArrayList<String> img = new ArrayList<String>();
+        String[] projection;
+        ArrayList<String> lstProjection = new ArrayList<String>();
+        String selection = "";
+
         switch (id) {
             case CURSORLOADER_THUMBS:
-                img.add(MediaStore.Images.Media._ID);
-                img.add(MediaStore.Images.Media.ORIENTATION);
+                projection = Projections.IMAGES;
                 break;
+            case CURSORLOADER_ALBUNS:
+                projection = Projections.ALBUMS;
+                lstProjection.add(MediaStore.Images.Media._ID);
+                lstProjection.add(MediaStore.Images.Media.ORIENTATION);
+                break;
+            case CURSORLOADER_THUMBS_ALBUM:
+                projection = Projections.IMAGES;
+                selection = MediaStore.Images.Media.BUCKET_ID + "='" + -1829889111 + "'";
+                break;
+            default:
+                projection = Projections.IMAGES;
         }
 
         return new CursorLoader(
                 this,
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                img.toArray(new String[img.size()]),
-                null,
+                projection,
+                selection,
                 null,
                 "DATE_MODIFIED DESC"
         );
@@ -222,6 +277,12 @@ public class GalleryActivity extends AppCompatActivity implements OnItemClickLis
 
         switch (loader.getId()) {
             case CURSORLOADER_THUMBS:
+                imagecursor = cursor;
+                image_column_index = imagecursor.getColumnIndex(MediaStore.Images.Media._ID);
+                image_column_orientation = imagecursor.getColumnIndex(MediaStore.Images.Media.ORIENTATION);
+                imageAdapter.notifyDataSetChanged();
+                break;
+            case CURSORLOADER_THUMBS_ALBUM:
                 imagecursor = cursor;
                 image_column_index = imagecursor.getColumnIndex(MediaStore.Images.Media._ID);
                 image_column_orientation = imagecursor.getColumnIndex(MediaStore.Images.Media.ORIENTATION);
@@ -264,26 +325,8 @@ public class GalleryActivity extends AppCompatActivity implements OnItemClickLis
         return rotation;
     }
 
-    public boolean isChecked(int position) {
-        return checkStatus.get(position);
-    }
-
-    @Override
-    public void onClick(View v) {
-        if (v.getId() == R.id.button_preview) {
-
-            ArrayList<SelectedFile> lstSelectedFiles = new ArrayList();
-
-            for (int i = 0; i < selectedFiles.size(); i++) {
-                lstSelectedFiles.add(selectedFiles.get(lstImageID.get(i)));
-            }
-
-            Intent intent = new Intent(this, PreviewActivity.class);
-            intent.putParcelableArrayListExtra("selectedFiles", lstSelectedFiles);
-            startActivityForResult(intent, ACTIVITY_PREVIEW);
-        } else if (v.getId() == R.id.button_apply) {
-            applyClicked();
-        }
+    public boolean isChecked(int imageID) {
+        return checkStatus.get(imageID);
     }
 
     private void applyClicked() {
@@ -324,7 +367,7 @@ public class GalleryActivity extends AppCompatActivity implements OnItemClickLis
                 imageGridView.thumbnail.setBackgroundColor(Color.TRANSPARENT);
                 imageGridView.radioCheckView.setChecked(false);
 
-                checkStatus.put(selectedFile.gridPosition, false);
+                checkStatus.put(selectedFile.imageID, false);
 
                 selectedFiles.remove(imageID);
                 int indexImageID = lstImageID.indexOf(imageID);
@@ -401,7 +444,7 @@ public class GalleryActivity extends AppCompatActivity implements OnItemClickLis
             final int id = imagecursor.getInt(image_column_index);
             final int rotate = imagecursor.getInt(image_column_orientation);
 
-            if (isChecked(position)) {
+            if (isChecked(id)) {
                 imageGridView.thumbnail.setImageAlpha(128);
                 imageGridView.setBackgroundColor(Color.BLACK);
                 imageGridView.radioCheckView.setChecked(true);
