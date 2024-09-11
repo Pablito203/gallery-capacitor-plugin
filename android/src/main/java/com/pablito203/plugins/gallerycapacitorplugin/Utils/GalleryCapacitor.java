@@ -1,4 +1,4 @@
-package com.pablito203.plugins.gallerycapacitorplugin;
+package com.pablito203.plugins.gallerycapacitorplugin.Utils;
 
 import android.database.Cursor;
 import android.net.Uri;
@@ -6,13 +6,12 @@ import android.provider.OpenableColumns;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.getcapacitor.Bridge;
-import com.getcapacitor.Logger;
 
 public class GalleryCapacitor {
 
     private Bridge bridge;
 
-    GalleryCapacitor(Bridge bridge) {
+    public GalleryCapacitor(Bridge bridge) {
         this.bridge = bridge;
     }
 

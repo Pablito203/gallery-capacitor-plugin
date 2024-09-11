@@ -1,10 +1,11 @@
-package com.pablito203.plugins.gallerycapacitorplugin;
+package com.pablito203.plugins.gallerycapacitorplugin.Views;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 
 import androidx.appcompat.widget.AppCompatImageView;
+
+import com.pablito203.plugins.gallerycapacitorplugin.R;
 
 public class RadioCheckView extends AppCompatImageView {
     public RadioCheckView(Context context) {

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Fragments.GridAlbums">
+
+    <GridView
+        android:id="@+id/gridview_grid_albums"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:columnWidth="0dp"
+        android:fadingEdgeLength="10dip"
+        android:fastScrollEnabled="true"
+        android:gravity="center"
+        android:horizontalSpacing="3dip"
+        android:numColumns="3"
+        android:requiresFadingEdge="vertical"
+        android:scrollingCache="true"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="3dip" />
+
+</FrameLayout>

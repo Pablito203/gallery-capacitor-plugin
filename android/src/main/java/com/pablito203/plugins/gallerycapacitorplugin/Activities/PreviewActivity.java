@@ -1,4 +1,4 @@
-package com.pablito203.plugins.gallerycapacitorplugin;
+package com.pablito203.plugins.gallerycapacitorplugin.Activities;
 
 import static android.provider.MediaStore.Images;
 import android.content.Intent;
@@ -23,6 +23,9 @@ import androidx.appcompat.widget.AppCompatImageView;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.pablito203.plugins.gallerycapacitorplugin.R;
+import com.pablito203.plugins.gallerycapacitorplugin.Views.RadioCheckView;
+import com.pablito203.plugins.gallerycapacitorplugin.Utils.SelectedFile;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
