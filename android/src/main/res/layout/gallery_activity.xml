@@ -5,7 +5,7 @@
     android:layout_width="fill_parent"
     android:orientation="vertical" >
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -13,34 +13,67 @@
         android:orientation="horizontal"
         android:elevation="4dp">
 
-        <TextView
-            android:id="@+id/images_button"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:paddingVertical="16dp"
-            android:foreground="?selectableItemBackground"
-            android:gravity="center"
-            android:textSize="16sp"
-            android:text="Imagens"
-            android:textColor="@android:color/white"
-            android:padding="16dp" />
+        <LinearLayout
+            android:id="@+id/toolbar_main"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/albuns_button"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:paddingVertical="16dp"
-            android:foreground="?selectableItemBackground"
-            android:gravity="center"
-            android:textSize="16sp"
-            android:text="Álbuns"
-            android:textColor="@android:color/darker_gray"
-            android:layout_gravity="end"
-            android:padding="16dp"/>
+            <TextView
+                android:id="@+id/images_button"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:paddingVertical="16dp"
+                android:foreground="?selectableItemBackground"
+                android:gravity="center"
+                android:textSize="16sp"
+                android:text="Imagens"
+                android:textColor="@android:color/white"
+                android:padding="16dp" />
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/albuns_button"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:paddingVertical="16dp"
+                android:foreground="?selectableItemBackground"
+                android:gravity="center"
+                android:textSize="16sp"
+                android:text="Álbuns"
+                android:textColor="@android:color/darker_gray"
+                android:layout_gravity="end"
+                android:padding="16dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/toolbar_album"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#141517"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/back_button_album"
+                android:src="@drawable/arrow_back_24"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:padding="10dp"
+                android:gravity="center"/>
+
+            <TextView
+                android:id="@+id/album_name_toolbar"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:paddingVertical="16dp"
+                android:textSize="16sp"
+                android:text="AlbumName"
+                android:textColor="@android:color/white" />
+
+        </LinearLayout>
+    </RelativeLayout>
 
     <FrameLayout
         android:id="@+id/bottom_toolbar"
@@ -55,7 +88,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
-            android:foreground="?selectableItemBackground"
             android:padding="16dp"
             android:text="Prévia"
             android:textSize="16sp"
@@ -72,7 +104,6 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:foreground="?selectableItemBackground"
                 android:text="Avançar"
                 android:paddingEnd="5dp"
                 android:textSize="16sp"
@@ -82,30 +113,19 @@
                 android:id="@+id/count_selected"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:foreground="?selectableItemBackground"
                 android:text="(0)"
                 android:textSize="16sp"
                 android:textColor="@android:color/white"/>
         </LinearLayout>
     </FrameLayout>
 
-    <GridView
-        android:id="@+id/gridview_images"
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fragment_container"
         android:layout_above="@id/bottom_toolbar"
         android:layout_below="@id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:columnWidth="0dip"
-        android:fadingEdgeLength="10dip"
-        android:fastScrollEnabled="true"
-        android:gravity="center"
-        android:horizontalSpacing="3dip"
-        android:numColumns="3"
-        android:requiresFadingEdge="vertical"
-        android:scrollingCache="true"
-        android:stretchMode="columnWidth"
-        android:verticalSpacing="3dip" />
+        android:layout_weight="1" />
 
     <FrameLayout
         android:id="@+id/empty_view"

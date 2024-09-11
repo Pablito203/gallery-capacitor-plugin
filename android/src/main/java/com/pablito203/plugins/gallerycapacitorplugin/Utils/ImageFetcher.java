@@ -1,4 +1,4 @@
-package com.pablito203.plugins.gallerycapacitorplugin;
+package com.pablito203.plugins.gallerycapacitorplugin.Utils;
 
 import android.graphics.Bitmap;
 import android.widget.ImageView;
