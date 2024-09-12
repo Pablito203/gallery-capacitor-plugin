@@ -60,6 +60,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:padding="10dp"
+                android:foreground="?selectableItemBackground"
                 android:gravity="center"/>
 
             <TextView
@@ -92,6 +93,7 @@
             android:text="Prévia"
             android:textSize="16sp"
             android:textColor="@android:color/white"
+            android:foreground="?selectableItemBackground"
             android:visibility="gone"/>
 
         <LinearLayout
@@ -99,6 +101,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
+            android:foreground="?selectableItemBackground"
             android:padding="16dp">
 
             <TextView

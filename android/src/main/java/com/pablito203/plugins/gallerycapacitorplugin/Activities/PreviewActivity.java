@@ -1,6 +1,7 @@
 package com.pablito203.plugins.gallerycapacitorplugin.Activities;
 
 import static android.provider.MediaStore.Images;
+
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -31,26 +33,55 @@ import com.squareup.picasso.Target;
 
 import java.util.ArrayList;
 
-public class PreviewActivity extends AppCompatActivity implements View.OnClickListener {
-
-    private TextView buttonBack;
+public class PreviewActivity extends AppCompatActivity {
     private LinearLayout buttonApply;
     private TextView countSelectedTextView;
-    private ArrayList<SelectedFile> selectedFiles = new ArrayList();
-    private ArrayList<Integer> lstImageIDRemoved = new ArrayList();
+    private ArrayList<SelectedFile> selectedFiles = new ArrayList<>();
+    private ArrayList<Integer> lstImageIDRemoved = new ArrayList<>();
     private ViewPager2 viewPager;
+    ViewPageAdapter pagerAdapter;
+
+    private FrameLayout bottomToolbar;
+    private boolean toolbarVisible = true;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         Intent intent = this.getIntent();
-
         selectedFiles = intent.getParcelableArrayListExtra("selectedFiles");
 
-        setContentView(R.layout.preview);
+        setContentView(R.layout.preview_activity);
         setupHeader();
+        setViewVariables();
+        setViewPager();
+        setOnClickListener();
+    }
 
+    private void setupHeader() {
+        Window window = this.getWindow();
+        int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        window.getDecorView().setSystemUiVisibility(flags);
+
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(Color.BLACK);
+    }
+
+    private void setViewVariables() {
+        viewPager = findViewById(R.id.pager);
+        buttonApply = findViewById(R.id.button_apply_preview);
+        bottomToolbar = findViewById(R.id.bottom_toolbar_preview);
+        countSelectedTextView = findViewById(R.id.count_selected_preview);
+        countSelectedTextView.setText(String.format("(%d)", selectedFiles.size()));
+    }
+
+    private void setViewPager() {
         ArrayList<ViewPagerItem> viewPagerItemArrayList = new ArrayList<>();
 
         for (int i = 0; i < selectedFiles.size(); i++) {
@@ -59,61 +90,52 @@ public class PreviewActivity extends AppCompatActivity implements View.OnClickLi
             viewPagerItemArrayList.add(viewPagerItem);
         }
 
-        viewPager = findViewById(R.id.pager);
         viewPager.setOffscreenPageLimit(15);
-        ViewPageAdapter pagerAdapter = new ViewPageAdapter(viewPagerItemArrayList);
+        pagerAdapter = new ViewPageAdapter(viewPagerItemArrayList);
         viewPager.setAdapter(pagerAdapter);
-
-        buttonBack = findViewById(R.id.button_back);
-        buttonBack.setOnClickListener(this);
-
-        buttonApply = findViewById(R.id.button_apply_preview);
-        buttonApply.setOnClickListener(this);
-
-        countSelectedTextView = findViewById(R.id.count_selected_preview);
-        countSelectedTextView.setText(String.format("(%d)", selectedFiles.size()));
     }
 
-    private void setupHeader() {
-        getSupportActionBar().hide();
-        Window window = this.getWindow();
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(Color.BLACK);
+    private void setOnClickListener() {
+        buttonApply.setOnClickListener(v -> onApplyClick());
     }
 
-    @Override
-    public void onClick(View v) {
-        if (v.getId() == R.id.button_back) {
-            setResult(RESULT_CANCELED);
-            finish();
-        } else if (v.getId() == R.id.button_apply_preview) {
-            Intent result = new Intent();
-            result.putIntegerArrayListExtra("lstImageIDRemoved", lstImageIDRemoved);
-            setResult(RESULT_OK, result);
-            finish();
-        }
+    private void onBackClick() {
+        setResult(RESULT_CANCELED);
+        finish();
+    }
+
+    private void onApplyClick() {
+        Intent result = new Intent();
+        result.putIntegerArrayListExtra("lstImageIDRemoved", lstImageIDRemoved);
+        setResult(RESULT_OK, result);
+        finish();
     }
 
     private class ViewPageAdapter extends RecyclerView.Adapter<ViewPageAdapter.ViewHolder> {
         ArrayList<ViewPagerItem> viewPagerItemArrayList;
+        ArrayList<ViewHolder> lstViewHolder = new ArrayList<>();
 
         public ViewPageAdapter(ArrayList<ViewPagerItem> viewPagerItemArrayList) {
             this.viewPagerItemArrayList = viewPagerItemArrayList;
         }
+
         @NonNull
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.image_preview, parent, false);
-            return new ViewHolder(view);
+            ViewHolder holder = new ViewHolder(view);
+            lstViewHolder.add(holder);
+            return holder;
         }
 
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             ViewPagerItem viewPagerItem = viewPagerItemArrayList.get(position);
+            int visibility = (toolbarVisible) ? View.VISIBLE : View.INVISIBLE;
 
             holder.imageID = viewPagerItem.imageID;
             holder.positionList = (int)position;
+            holder.topToolbar.setVisibility(visibility);
 
             if (holder.checked != viewPagerItem.checked) {
                 holder.checked = viewPagerItem.checked;
@@ -152,41 +174,70 @@ public class PreviewActivity extends AppCompatActivity implements View.OnClickLi
             return viewPagerItemArrayList.size();
         }
 
-        public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        public class ViewHolder extends RecyclerView.ViewHolder {
             private RadioCheckView radioCheckView;
             private AppCompatImageView thumbnail;
+            private FrameLayout topToolbar;
+            private AppCompatImageView backButton;
+
             private boolean checked = true;
             private int imageID = 0;
             private int positionList = 0;
+            private boolean changeToolbarVisibility = false;
 
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
 
+                setViewVariables();
+                setOnClickListener();
+            }
+
+            private void setViewVariables() {
                 radioCheckView = itemView.findViewById(R.id.check_view_preview);
-                radioCheckView.setOnClickListener(this);
                 thumbnail = itemView.findViewById(R.id.media_thumbnail_preview);
+                topToolbar = itemView.findViewById(R.id.top_toolbar_preview);
+                backButton = itemView.findViewById(R.id.back_button_preview);
             }
 
-            @Override
-            public void onClick(View v) {
-                if (v.getId() == R.id.check_view_preview) {
-                    checked = !checked;
-                    ViewPagerItem viewPagerItem = viewPagerItemArrayList.get(positionList);
-                    viewPagerItem.checked = checked;
+            private void setOnClickListener() {
+                this.radioCheckView.setOnClickListener(v -> onCheckViewClick());
+                this.thumbnail.setOnClickListener(v -> onThumbnailClick());
+                this.backButton.setOnClickListener(v -> onBackClick());
+            }
 
-                    this.radioCheckView.setChecked(checked);
+            private void onCheckViewClick() {
+                checked = !checked;
+                ViewPagerItem viewPagerItem = viewPagerItemArrayList.get(positionList);
+                viewPagerItem.checked = checked;
 
-                    if (checked) {
-                        int index = lstImageIDRemoved.indexOf(imageID);
-                        lstImageIDRemoved.remove(index);
-                    } else {
-                        lstImageIDRemoved.add(imageID);
-                    }
+                this.radioCheckView.setChecked(checked);
 
-                    int countSelected = selectedFiles.size() - lstImageIDRemoved.size();
-                    countSelectedTextView.setText(String.format("(%d)", countSelected));
+                if (checked) {
+                    int index = lstImageIDRemoved.indexOf(imageID);
+                    lstImageIDRemoved.remove(index);
+                } else {
+                    lstImageIDRemoved.add(imageID);
                 }
+
+                int countSelected = selectedFiles.size() - lstImageIDRemoved.size();
+                countSelectedTextView.setText(String.format("(%d)", countSelected));
             }
+
+            private void onThumbnailClick() {
+                if(changeToolbarVisibility) {return;}
+                changeToolbarVisibility = true;
+
+                int visibility = (toolbarVisible) ? View.INVISIBLE : View.VISIBLE;
+                for (int i = 0; i < lstViewHolder.size(); i++) {
+                    ViewHolder holder = lstViewHolder.get(i);
+                    holder.topToolbar.setVisibility(visibility);
+                }
+                bottomToolbar.setVisibility(visibility);
+
+                toolbarVisible = !toolbarVisible;
+                changeToolbarVisibility = false;
+            }
+
         }
     }
 

@@ -84,16 +84,12 @@ public class GalleryActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode != RESULT_OK) {
-            return;
-        }
+        if (resultCode != RESULT_OK) { return; }
 
         if (requestCode == ACTIVITY_PREVIEW) {
             ArrayList<Integer> lstImageIDRemoved = data.getIntegerArrayListExtra("lstImageIDRemoved");
 
-            if (lstImageIDRemoved.size() == 0) {
-                return;
-            }
+            if (lstImageIDRemoved.size() == 0) { return; }
 
             int countSelected = selectedFiles.size() - lstImageIDRemoved.size();
             countSelectedTextView.setText(String.format("(%d)", countSelected));
@@ -232,8 +228,7 @@ public class GalleryActivity extends AppCompatActivity {
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                int countBackStack = fragmentManager.getBackStackEntryCount();
-                if (countBackStack > 0) {
+                if (fragmentManager.getBackStackEntryCount() > 0) {
                     onBackButtonAlbumClick();
                     return;
                 }

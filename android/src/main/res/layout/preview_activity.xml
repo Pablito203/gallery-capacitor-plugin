@@ -15,32 +15,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="@android:color/transparent"
+        android:background="#80000000"
         android:elevation="4dp">
-
-        <TextView
-            android:id="@+id/button_back"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:foreground="?selectableItemBackground"
-            android:padding="16dp"
-            android:layout_gravity="start"
-            android:text="Voltar"
-            android:textColor="@android:color/white"
-            android:textSize="16sp"/>
-
 
         <LinearLayout
             android:id="@+id/button_apply_preview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
+            android:foreground="?selectableItemBackground"
             android:padding="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:foreground="?selectableItemBackground"
                 android:text="Salvar"
                 android:paddingEnd="5dp"
                 android:textSize="16sp"
@@ -50,20 +38,9 @@
                 android:id="@+id/count_selected_preview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:foreground="?selectableItemBackground"
                 android:text="(0)"
                 android:textSize="16sp"
                 android:textColor="@android:color/white"/>
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/button_apply"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:padding="16dp"
-            android:textColor="@android:color/white"
-            android:textSize="16sp"/>
-
     </FrameLayout>
 </RelativeLayout>

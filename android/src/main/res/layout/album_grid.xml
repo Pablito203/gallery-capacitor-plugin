@@ -10,7 +10,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:elevation="4dp"
-            android:background="#50000000"
+            android:background="@drawable/background_gradient"
             android:layout_gravity="bottom">
 
             <TextView
@@ -18,6 +18,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="14dp"
-                android:textColor="@android:color/white"/>
+                android:textColor="@android:color/white"
+                android:scrollHorizontally="true"
+                android:ellipsize="end"
+                android:maxLines="1"/>
         </LinearLayout>
 </merge>

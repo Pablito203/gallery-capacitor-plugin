@@ -1,6 +1,5 @@
 package com.pablito203.plugins.gallerycapacitorplugin.Fragments;
 
-import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;
