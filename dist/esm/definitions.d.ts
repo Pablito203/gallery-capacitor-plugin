@@ -9,6 +9,20 @@ export interface GalleryCapacitorPlugin {
      * @since 0.5.3
      */
     pickFiles(options?: PickFilesOptions): Promise<PickFilesResult>;
+    /**
+       * Check read media permission.
+       * Required on Android only in android.
+       *
+       * @since 1.0.0
+       */
+    checkPermissions(): Promise<PermissionStatus>;
+    /**
+     * Request read media permission.
+     * Required on Android only in android..
+     *
+     * @since 1.0.0
+     */
+    requestPermissions(): Promise<PermissionStatus>;
 }
 export interface PickFilesOptions {
     /**
@@ -40,4 +54,19 @@ export interface PickedFile {
      * The size of the file in bytes.
      */
     size: number;
+}
+export declare type GalleryPermissionState = 'granted' | 'limited' | 'denied';
+export declare const GalleryPermissionType: {
+    /**
+     * The permission name for Android 13 / API 33 and above.
+     */
+    TIRAMISU_GALLERY: string;
+    /**
+     * The permission name for Android 12 / API 32 and below.
+     */
+    GALLERY: string;
+};
+export interface PermissionStatus {
+    gallery?: GalleryPermissionState;
+    tiramisuGallery?: GalleryPermissionState;
 }

@@ -28,6 +28,40 @@
           "PickFilesOptions"
         ],
         "slug": "pickfiles"
+      },
+      {
+        "name": "checkPermissions",
+        "signature": "() => Promise<PermissionStatus>",
+        "parameters": [],
+        "returns": "Promise<PermissionStatus>",
+        "tags": [
+          {
+            "name": "since",
+            "text": "1.0.0"
+          }
+        ],
+        "docs": "Check read media permission.\r\nRequired on Android only in android.",
+        "complexTypes": [
+          "PermissionStatus"
+        ],
+        "slug": "checkpermissions"
+      },
+      {
+        "name": "requestPermissions",
+        "signature": "() => Promise<PermissionStatus>",
+        "parameters": [],
+        "returns": "Promise<PermissionStatus>",
+        "tags": [
+          {
+            "name": "since",
+            "text": "1.0.0"
+          }
+        ],
+        "docs": "Request read media permission.\r\nRequired on Android only in android..",
+        "complexTypes": [
+          "PermissionStatus"
+        ],
+        "slug": "requestpermissions"
       }
     ],
     "properties": []
@@ -108,9 +142,56 @@
           "type": "number | undefined"
         }
       ]
+    },
+    {
+      "name": "PermissionStatus",
+      "slug": "permissionstatus",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "gallery",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [
+            "GalleryPermissionState"
+          ],
+          "type": "GalleryPermissionState"
+        },
+        {
+          "name": "tiramisuGallery",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [
+            "GalleryPermissionState"
+          ],
+          "type": "GalleryPermissionState"
+        }
+      ]
     }
   ],
   "enums": [],
-  "typeAliases": [],
+  "typeAliases": [
+    {
+      "name": "GalleryPermissionState",
+      "slug": "gallerypermissionstate",
+      "docs": "",
+      "types": [
+        {
+          "text": "'granted'",
+          "complexTypes": []
+        },
+        {
+          "text": "'limited'",
+          "complexTypes": []
+        },
+        {
+          "text": "'denied'",
+          "complexTypes": []
+        }
+      ]
+    }
+  ],
   "pluginConfigs": []
 }

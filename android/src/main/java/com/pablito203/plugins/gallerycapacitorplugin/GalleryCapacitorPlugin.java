@@ -1,19 +1,24 @@
 package com.pablito203.plugins.gallerycapacitorplugin;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 
 import androidx.activity.result.ActivityResult;
 import androidx.annotation.Nullable;
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
+import com.getcapacitor.PermissionState;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.ActivityCallback;
 import com.getcapacitor.annotation.CapacitorPlugin;
+import com.getcapacitor.annotation.Permission;
+import com.getcapacitor.annotation.PermissionCallback;
 import com.pablito203.plugins.gallerycapacitorplugin.Activities.GalleryActivity;
 import com.pablito203.plugins.gallerycapacitorplugin.Utils.GalleryCapacitor;
 
@@ -21,10 +26,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@CapacitorPlugin(name = "GalleryCapacitor")
+@CapacitorPlugin(
+    name = "GalleryCapacitor",
+    permissions = {
+            @Permission(strings = {Manifest.permission.READ_MEDIA_IMAGES}, alias = GalleryCapacitorPlugin.TIRAMISU_GALLERY_PERMISSION),
+            @Permission(strings = {Manifest.permission.READ_EXTERNAL_STORAGE}, alias = GalleryCapacitorPlugin.GALLERY_PERMISSION)
+    }
+)
 public class GalleryCapacitorPlugin extends Plugin {
     public static final String ERROR_PICK_FILE_FAILED = "pickFiles failed.";
     public static final String ERROR_PICK_FILE_CANCELED = "pickFiles canceled.";
+    public static final String TIRAMISU_GALLERY_PERMISSION = "tiramisuGallery";
+    public static final String GALLERY_PERMISSION = "gallery";
+    public static final String PERMISSION_NAME = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) ? TIRAMISU_GALLERY_PERMISSION : GALLERY_PERMISSION;
     private GalleryCapacitor implementation;
     public void load() {
         implementation = new GalleryCapacitor(this.getBridge());
@@ -42,6 +56,29 @@ public class GalleryCapacitorPlugin extends Plugin {
         } catch (Exception ex) {
             String message = ex.getMessage();
             call.reject(message);
+        }
+    }
+
+    @PluginMethod
+    @PermissionCallback
+    public void checkPermissions(PluginCall call) {
+        if (isPermissionGranted()) {
+            JSObject permissionsResultJSON = new JSObject();
+            permissionsResultJSON.put(PERMISSION_NAME, "granted");
+            call.resolve(permissionsResultJSON);
+        } else {
+            super.checkPermissions(call);
+        }
+    }
+
+    @PluginMethod
+    public void requestPermissions(PluginCall call) {
+        if (isPermissionGranted()) {
+            JSObject permissionsResultJSON = new JSObject();
+            permissionsResultJSON.put(PERMISSION_NAME, "granted");
+            call.resolve(permissionsResultJSON);
+        } else {
+            super.requestPermissionForAlias(PERMISSION_NAME, call, "checkPermissions");
         }
     }
 
@@ -94,5 +131,9 @@ public class GalleryCapacitorPlugin extends Plugin {
         }
         callResult.put("files", JSArray.from(filesResultList.toArray()));
         return callResult;
+    }
+
+    private boolean isPermissionGranted() {
+        return getPermissionState(PERMISSION_NAME) == PermissionState.GRANTED;
     }
 }

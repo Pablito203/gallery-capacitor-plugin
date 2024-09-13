@@ -14,7 +14,10 @@ npx cap sync
 <docgen-index>
 
 * [`pickFiles(...)`](#pickfiles)
+* [`checkPermissions()`](#checkpermissions)
+* [`requestPermissions()`](#requestpermissions)
 * [Interfaces](#interfaces)
+* [Type Aliases](#type-aliases)
 
 </docgen-index>
 
@@ -44,6 +47,38 @@ Only available on Android and iOS.
 --------------------
 
 
+### checkPermissions()
+
+```typescript
+checkPermissions() => Promise<PermissionStatus>
+```
+
+Check read media permission.
+Required on Android only in android.
+
+**Returns:** <code>Promise&lt;<a href="#permissionstatus">PermissionStatus</a>&gt;</code>
+
+**Since:** 1.0.0
+
+--------------------
+
+
+### requestPermissions()
+
+```typescript
+requestPermissions() => Promise<PermissionStatus>
+```
+
+Request read media permission.
+Required on Android only in android..
+
+**Returns:** <code>Promise&lt;<a href="#permissionstatus">PermissionStatus</a>&gt;</code>
+
+**Since:** 1.0.0
+
+--------------------
+
+
 ### Interfaces
 
 
@@ -69,5 +104,21 @@ Only available on Android and iOS.
 | Prop                    | Type                | Description              | Default         |
 | ----------------------- | ------------------- | ------------------------ | --------------- |
 | **`maximumFilesCount`** | <code>number</code> | Max files to be selected | <code>15</code> |
+
+
+#### PermissionStatus
+
+| Prop                  | Type                                                                      |
+| --------------------- | ------------------------------------------------------------------------- |
+| **`gallery`**         | <code><a href="#gallerypermissionstate">GalleryPermissionState</a></code> |
+| **`tiramisuGallery`** | <code><a href="#gallerypermissionstate">GalleryPermissionState</a></code> |
+
+
+### Type Aliases
+
+
+#### GalleryPermissionState
+
+<code>'granted' | 'limited' | 'denied'</code>
 
 </docgen-api>
