@@ -57,7 +57,7 @@
             "text": "1.0.0"
           }
         ],
-        "docs": "Request read media permission.\r\nRequired on Android only in android..",
+        "docs": "Request read media permission.\r\nRequired on Android only in android.",
         "complexTypes": [
           "PermissionStatus"
         ],

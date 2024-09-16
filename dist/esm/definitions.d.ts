@@ -18,7 +18,7 @@ export interface GalleryCapacitorPlugin {
     checkPermissions(): Promise<PermissionStatus>;
     /**
      * Request read media permission.
-     * Required on Android only in android..
+     * Required on Android only in android.
      *
      * @since 1.0.0
      */

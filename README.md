@@ -70,7 +70,7 @@ requestPermissions() => Promise<PermissionStatus>
 ```
 
 Request read media permission.
-Required on Android only in android..
+Required on Android only in android.
 
 **Returns:** <code>Promise&lt;<a href="#permissionstatus">PermissionStatus</a>&gt;</code>
 
