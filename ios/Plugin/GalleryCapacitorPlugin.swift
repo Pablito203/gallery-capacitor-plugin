@@ -8,6 +8,7 @@ import Capacitor
 @objc(GalleryCapacitorPlugin)
 public class GalleryCapacitorPlugin: CAPPlugin {
     public let errorPickFileCanceled = "pickFiles canceled."
+    public let errorUnknown = "Unknown error occurred."
     public let errorTemporaryCopyFailed = "An unknown error occurred while creating a temporary copy of the file."
     public let errorUnsupportedFileTypeIdentifier = "Unsupported file type identifier."
     public let pickerDismissedEvent = "pickerDismissed"
