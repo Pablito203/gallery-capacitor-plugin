@@ -16,21 +16,7 @@ import MobileCoreServices
 
     public func openImagePicker(maximumFilesCount: Int) {
         DispatchQueue.main.async {
-            if #available(iOS 14, *) {
-                var configuration = PHPickerConfiguration(photoLibrary: PHPhotoLibrary.shared())
-                configuration.selectionLimit = maximumFilesCount
-                configuration.filter = .images
-                let picker = PHPickerViewController(configuration: configuration)
-                picker.delegate = self
-                picker.modalPresentationStyle = .fullScreen
-                self.presentViewController(picker)
-            } else {
-                let picker = UIImagePickerController()
-                picker.delegate = self
-                picker.sourceType = .photoLibrary
-                picker.modalPresentationStyle = .fullScreen
-                self.presentViewController(picker)
-            }
+            self.presentViewController(GalleryController())
         }
     }
 
