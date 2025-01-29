@@ -1,0 +1,9 @@
+import SwiftUI
+
+public struct Config {
+    
+    public struct SafeArea {
+        public static var top = UIApplication.shared.keyWindow?.safeAreaInsets.top ?? 0
+        public static var bottom = UIApplication.shared.keyWindow?.safeAreaInsets.bottom ?? 0
+    }
+}
