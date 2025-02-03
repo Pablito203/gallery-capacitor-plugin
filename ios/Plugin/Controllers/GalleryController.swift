@@ -7,6 +7,7 @@ public class GalleryController : UIViewController {
     lazy var albunsButton = makeAlbunsButton()
     lazy var doneButton = makeDoneButton()
     lazy var previewButton = makePreviewButton()
+    lazy var imagesController = makeImagesController()
     
     public required init() {
         super.init(nibName: nil, bundle: nil)
@@ -22,6 +23,11 @@ public class GalleryController : UIViewController {
         setup()
     }
     
+    open override func viewDidLayoutSubviews() {
+        let bottomInset = topView.frame.size.height + 40
+        imagesController.collectionView.g_updateBottomInset(bottomInset)
+    }
+    
     private func setup() {
         view.backgroundColor = .white
         setupTopView()
@@ -30,8 +36,9 @@ public class GalleryController : UIViewController {
     }
     
     private func setupTopView() {
-        topView.addSubview(imagesButton)
-        topView.addSubview(albunsButton)
+        [imagesButton, albunsButton].forEach {
+            topView.addSubview($0)
+        }
         self.view.addSubview(topView)
         
         Constraint.on(
@@ -51,32 +58,38 @@ public class GalleryController : UIViewController {
     }
     
     private func setupImagesView() {
-        let imagesController = ImagesController()
+        addChild(imagesController)
         let imagesView = imagesController.view!
         view.addSubview(imagesView)
+        imagesController.didMove(toParent: self)
         
-        Constraint.on(
-            imagesView.heightAnchor.constraint(equalToConstant: view.frame.size.height - (50 + Config.SafeArea.top) - (40 + Config.SafeArea.bottom))
-        )
-        imagesView.g_pin(on: .top, view: topView, on: .bottom)
+        imagesView.g_pinDownward()
+        imagesView.g_pin(on: .top, view: topView, on: .bottom, constant: 1)
     }
     
     private func setupBottomView() {
-        bottomView.addSubview(doneButton)
-        bottomView.addSubview(previewButton)
+        [doneButton, previewButton].forEach {
+            bottomView.addSubview($0)
+        }
         self.view.addSubview(bottomView)
         
         Constraint.on(
-          bottomView.leftAnchor.constraint(equalTo: topView.superview!.leftAnchor),
-          bottomView.rightAnchor.constraint(equalTo: topView.superview!.rightAnchor),
-          bottomView.bottomAnchor.constraint(equalTo: topView.superview!.bottomAnchor),
-          bottomView.heightAnchor.constraint(equalToConstant: 40 + Config.SafeArea.bottom)
+            bottomView.leftAnchor.constraint(equalTo: topView.superview!.leftAnchor),
+            bottomView.rightAnchor.constraint(equalTo: topView.superview!.rightAnchor),
+            bottomView.bottomAnchor.constraint(equalTo: topView.superview!.bottomAnchor),
+            bottomView.heightAnchor.constraint(equalToConstant: 40 + Config.SafeArea.bottom)
         )
         
         doneButton.g_pin(on: .top, constant: 10)
-        doneButton.g_pin(on: .right, constant: -20)  
+        doneButton.g_pin(on: .right, constant: -20)
         previewButton.g_pin(on: .top, constant: 10)
         previewButton.g_pin(on: .left, constant: 20)
+    }
+    
+    private func makeImagesController() -> ImagesController {
+        let imagesController = ImagesController()
+        
+        return imagesController
     }
     
     private func makeToolbarView() -> UIView {

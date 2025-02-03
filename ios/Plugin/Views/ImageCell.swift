@@ -2,39 +2,50 @@ import UIKit
 import Photos
 
 class ImageCell: UICollectionViewCell {
-
-    lazy var textView: UITextView = self.makeTextView()
-
-  // MARK: - Initialization
-
-  override init(frame: CGRect) {
-    super.init(frame: frame)
-
-    setup()
-  }
-
-  required init?(coder aDecoder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
-  }
+    
+	
+    lazy var imageView: UIImageView = self.makeImageView()
+    
+    // MARK: - Initialization
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        
+        setup()
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func configure(_ asset: PHAsset) {
+        imageView.layoutIfNeeded()
+        imageView.g_loadImage(asset)
+    }
+    
 
   // MARK: - Setup
 
-  func setup() {
-    [textView].forEach {
-      self.contentView.addSubview($0)
+    func setup() {
+        [imageView].forEach {
+            self.contentView.addSubview($0)
+        }
     }
-      
-      contentView.backgroundColor = .blue
-
-    textView.g_pinEdges()
-  }
 
   // MARK: - Controls
 
-  private func makeTextView() -> UITextView {
-    let textoUI = UITextView()
-    textoUI.text = "Images"
+    private func makeTextView() -> UITextView {
+        let textoUI = UITextView()
+        textoUI.text = "Images"
 
-    return textoUI
-  }
+        return textoUI
+    }
+    
+    private func makeImageView() -> UIImageView {
+        let imageView = UIImageView()
+        imageView.clipsToBounds = true
+        imageView.contentMode = .scaleAspectFill
+
+        return imageView
+    }
 }
