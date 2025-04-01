@@ -12,6 +12,7 @@ import MobileCoreServices
 
     public func openImagePicker(maximumFilesCount: Int) {
         DispatchQueue.main.async {
+            Config.maximumFilesCount = maximumFilesCount
             let picker = GalleryController()
             picker.delegate = self
             self.presentViewController(picker)
