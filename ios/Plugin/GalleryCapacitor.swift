@@ -1,10 +1,6 @@
 import Foundation
-import PhotosUI
-import Photos
-import Capacitor
 import UIKit
 import MobileCoreServices
-
 
 @objc public class GalleryCapacitor: NSObject {
     private var plugin: GalleryCapacitorPlugin?
@@ -16,21 +12,9 @@ import MobileCoreServices
 
     public func openImagePicker(maximumFilesCount: Int) {
         DispatchQueue.main.async {
-            if #available(iOS 14, *) {
-                var configuration = PHPickerConfiguration(photoLibrary: PHPhotoLibrary.shared())
-                configuration.selectionLimit = maximumFilesCount
-                configuration.filter = .images
-                let picker = PHPickerViewController(configuration: configuration)
-                picker.delegate = self
-                picker.modalPresentationStyle = .fullScreen
-                self.presentViewController(picker)
-            } else {
-                let picker = UIImagePickerController()
-                picker.delegate = self
-                picker.sourceType = .photoLibrary
-                picker.modalPresentationStyle = .fullScreen
-                self.presentViewController(picker)
-            }
+            let picker = GalleryController()
+            picker.delegate = self
+            self.presentViewController(picker)
         }
     }
 
@@ -98,103 +82,19 @@ import MobileCoreServices
     }
 }
 
-extension GalleryCapacitor: UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIPopoverPresentationControllerDelegate {
-    public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-        dismissViewController(picker)
-        plugin?.handleDocumentPickerResult(urls: nil, error: nil)
-    }
-
-    public func popoverPresentationControllerDidDismissPopover(_ popoverPresentationController: UIPopoverPresentationController) {
-        plugin?.handleDocumentPickerResult(urls: nil, error: nil)
-    }
-
-    public func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
-        plugin?.handleDocumentPickerResult(urls: nil, error: nil)
-    }
-
-    public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
-        dismissViewController(picker) {
-            if let url = info[.mediaURL] as? URL {
-                do {
-                    let temporaryUrl = try self.saveTemporaryFile(url)
-                    self.plugin?.handleDocumentPickerResult(urls: [temporaryUrl], error: nil)
-                } catch {
-                    self.plugin?.handleDocumentPickerResult(urls: nil, error: self.plugin?.errorTemporaryCopyFailed)
-                }
-            } else {
-                self.plugin?.handleDocumentPickerResult(urls: nil, error: nil)
-            }
-        }
-    }
-}
-
-@available(iOS 14, *)
-extension GalleryCapacitor: PHPickerViewControllerDelegate {
-    public func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-        dismissViewController(picker)
-        if results.first == nil {
-            self.plugin?.handleDocumentPickerResult(urls: nil, error: nil)
-            return
-        }
+extension GalleryCapacitor: GalleryControllerDelegate {
+    public func galleryController(_ urls: [URL], _ controller: GalleryController) {
+        dismissViewController(controller)
         var temporaryUrls: [URL] = []
-        var errorMessage: String?
-        let dispatchGroup = DispatchGroup()
-        for result in results {
-            if errorMessage != nil {
-                break
-            }
-            if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) {
-                dispatchGroup.enter()
-                result.itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.movie.identifier, completionHandler: { url, error in
-                    defer {
-                        dispatchGroup.leave()
-                    }
-                    if let error = error {
-                        errorMessage = error.localizedDescription
-                        return
-                    }
-                    guard let url = url else {
-                        errorMessage = self.plugin?.errorUnknown
-                        return
-                    }
-                    do {
-                        let temporaryUrl = try self.saveTemporaryFile(url)
-                        temporaryUrls.append(temporaryUrl)
-                    } catch {
-                        errorMessage = self.plugin?.errorTemporaryCopyFailed
-                    }
-                })
-            } else if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier) {
-                dispatchGroup.enter()
-                result.itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.image.identifier, completionHandler: { url, error in
-                    defer {
-                        dispatchGroup.leave()
-                    }
-                    if let error = error {
-                        errorMessage = error.localizedDescription
-                        return
-                    }
-                    guard let url = url else {
-                        errorMessage = self.plugin?.errorUnknown
-                        return
-                    }
-                    do {
-                        let temporaryUrl = try self.saveTemporaryFile(url)
-                        temporaryUrls.append(temporaryUrl)
-                    } catch {
-                        errorMessage = self.plugin?.errorTemporaryCopyFailed
-                    }
-                })
-            } else {
-                errorMessage = self.plugin?.errorUnsupportedFileTypeIdentifier
-            }
-        }
-        dispatchGroup.notify(queue: .main) {
-            if let errorMessage = errorMessage {
-                self.plugin?.handleDocumentPickerResult(urls: nil, error: errorMessage)
+        for url in urls {
+            do {
+                let temporaryUrl = try self.saveTemporaryFile(url)
+                temporaryUrls.append(temporaryUrl)
+            } catch {
+                self.plugin?.handleDocumentPickerResult(urls: nil, error: self.plugin?.errorTemporaryCopyFailed)
                 return
             }
-            self.plugin?.handleDocumentPickerResult(urls: temporaryUrls, error: nil)
         }
+        self.plugin?.handleDocumentPickerResult(urls: temporaryUrls, error: nil)
     }
 }

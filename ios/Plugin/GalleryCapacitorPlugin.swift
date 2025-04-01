@@ -1,5 +1,6 @@
 import Foundation
 import Capacitor
+import Photos
 
 /**
  * Please read the Capacitor iOS Plugin Development Guide
@@ -32,15 +33,41 @@ public class GalleryCapacitorPlugin: CAPPlugin {
     }
 
     @objc override public func checkPermissions(_ call: CAPPluginCall) {
-        call.resolve([
-            "gallery": "granted"
-        ])
+        let status = PHPhotoLibrary.authorizationStatus()
+
+        switch status {
+        case .authorized:
+            call.resolve([
+                "gallery": "granted"
+            ])
+        case .limited:
+            call.resolve([
+                "gallery": "limited"
+            ])
+        default:
+            call.resolve([
+                "gallery": "denied"
+            ])
+        }
     }
 
     @objc override public func requestPermissions(_ call: CAPPluginCall) {
-        call.resolve([
-            "gallery": "granted"
-        ])
+        PHPhotoLibrary.requestAuthorization { status in
+            switch status {
+            case .authorized:
+                call.resolve([
+                    "gallery": "granted"
+                ])
+            case .limited:
+                call.resolve([
+                    "gallery": "limited"
+                ])
+            default:
+                call.resolve([
+                    "gallery": "denied"
+                ])
+            }
+        }
     }
 
     @objc func handleDocumentPickerResult(urls: [URL]?, error: String?) {

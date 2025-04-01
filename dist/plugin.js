@@ -40,8 +40,6 @@ var capacitorGalleryCapacitor = (function (exports, core) {
     exports.GalleryCapacitor = GalleryCapacitor;
     exports.GalleryPermissionType = GalleryPermissionType;
 
-    Object.defineProperty(exports, '__esModule', { value: true });
-
     return exports;
 
 })({}, capacitorExports);
