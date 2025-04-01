@@ -208,6 +208,8 @@ public class GridImages extends Fragment implements LoaderManager.LoaderCallback
         }
 
         public void setChecked(boolean isChecked) {
+            if (galleryActivity.maximumFilesCount == 1) { return; }
+
             if (isChecked) {
                 thumbnail.setImageAlpha(128);
                 thumbnail.setBackgroundColor(Color.BLACK);
@@ -230,6 +232,11 @@ public class GridImages extends Fragment implements LoaderManager.LoaderCallback
 
             thumbnail = (ImageView) findViewById(R.id.media_thumbnail);
             radioCheckView = (RadioCheckView) findViewById(R.id.check_view);
+            if (galleryActivity.maximumFilesCount == 1) {
+              var checkViewBackground = findViewById(R.id.check_view_background);
+              checkViewBackground.setVisibility(INVISIBLE);
+              radioCheckView.setVisibility(INVISIBLE);
+            }
         }
     }
 

@@ -17,12 +17,12 @@
         android:elevation="4dp"/>
 
     <LinearLayout
+        android:id="@+id/check_view_background"
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:layout_marginTop="7.5dp"
         android:layout_marginStart="7.5dp"
-        android:background="@drawable/circle_background">
-
-    </LinearLayout>
+        android:background="@drawable/circle_background"
+        android:orientation="horizontal"/>
 
 </merge>
