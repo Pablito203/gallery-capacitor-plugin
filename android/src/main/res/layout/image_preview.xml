@@ -3,30 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <FrameLayout
-        android:id="@+id/top_toolbar_preview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#80000000"
-        android:elevation="4dp"
-        android:padding="10dp">
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/back_button_preview"
-            android:src="@drawable/arrow_back_24"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:padding="10dp"
-            android:foreground="?selectableItemBackground" />
-
-        <com.pablito203.plugins.gallerycapacitorplugin.Views.RadioCheckView
-            android:id="@+id/check_view_preview"
-            android:src="@drawable/ic_radio_on"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_gravity="end"/>
-    </FrameLayout>
-
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/media_thumbnail_preview"
         android:layout_width="match_parent"

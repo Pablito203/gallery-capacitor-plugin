@@ -251,10 +251,7 @@ public class GalleryActivity extends AppCompatActivity {
     }
 
     public void onItemClick(int imageID, boolean isChecked) {
-        if (isChecked && maximumFilesCount > 1 && selectedFiles.size() >= maximumFilesCount) {
-            showMaxFilesSelectedDialog();
-            return;
-        } else if (isChecked) {
+        if (isChecked) {
             SelectedFile selectedFile = new SelectedFile(imageID);
             selectedFiles.put(imageID, selectedFile);
             lstImageID.add(imageID);
@@ -278,6 +275,15 @@ public class GalleryActivity extends AppCompatActivity {
         checkStatus.put(imageID, isChecked);
 
         setCountSelectedImages();
+    }
+
+    public boolean checkMaximumFiles(boolean isChecked) {
+        if (isChecked && maximumFilesCount > 1 && selectedFiles.size() >= maximumFilesCount) {
+            showMaxFilesSelectedDialog();
+            return true;
+        }
+
+        return false;
     }
 
     public void onAlbumClick(int albumID, String albumName) {

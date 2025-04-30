@@ -150,9 +150,13 @@ public class GridImages extends Fragment implements LoaderManager.LoaderCallback
             }
 
             int imageID = imageCursor.getInt(imageColumnIndex);
-            ImageGridView imageGridView = (ImageGridView) view;
             boolean isChecked = !galleryActivity.isChecked(imageID);
 
+            if (galleryActivity.checkMaximumFiles(isChecked)) {
+                return;
+            }
+
+            ImageGridView imageGridView = (ImageGridView) view;
             imageGridView.setChecked(isChecked);
             galleryActivity.onItemClick(imageID, isChecked);
         });

@@ -34,15 +34,22 @@ import com.squareup.picasso.Target;
 import java.util.ArrayList;
 
 public class PreviewActivity extends AppCompatActivity {
-    private LinearLayout buttonApply;
-    private TextView countSelectedTextView;
     private ArrayList<SelectedFile> selectedFiles = new ArrayList<>();
     private ArrayList<Integer> lstImageIDRemoved = new ArrayList<>();
     private ViewPager2 viewPager;
     ViewPageAdapter pagerAdapter;
 
+    private RadioCheckView radioCheckView;
+    private AppCompatImageView thumbnail;
+    private FrameLayout topToolbar;
+    private AppCompatImageView backButton;
+
+    private TextView countSelectedTextView;
+    private LinearLayout buttonApply;
     private FrameLayout bottomToolbar;
     private boolean toolbarVisible = true;
+
+    ArrayList<ViewPagerItem> viewPagerItemArrayList;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -77,6 +84,11 @@ public class PreviewActivity extends AppCompatActivity {
         viewPager = findViewById(R.id.pager);
         buttonApply = findViewById(R.id.button_apply_preview);
         bottomToolbar = findViewById(R.id.bottom_toolbar_preview);
+        topToolbar = findViewById(R.id.top_toolbar_preview);
+        radioCheckView = findViewById(R.id.check_view_preview);
+        thumbnail = findViewById(R.id.media_thumbnail_preview);
+        topToolbar = findViewById(R.id.top_toolbar_preview);
+        backButton = findViewById(R.id.back_button_preview);
         countSelectedTextView = findViewById(R.id.count_selected_preview);
         countSelectedTextView.setText(String.format("(%d)", selectedFiles.size()));
     }
@@ -93,10 +105,40 @@ public class PreviewActivity extends AppCompatActivity {
         viewPager.setOffscreenPageLimit(15);
         pagerAdapter = new ViewPageAdapter(viewPagerItemArrayList);
         viewPager.setAdapter(pagerAdapter);
+
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                ViewPagerItem viewPagerItem = viewPagerItemArrayList.get(position);
+                radioCheckView.setChecked(viewPagerItem.checked);
+            }
+        });
+
     }
 
     private void setOnClickListener() {
         buttonApply.setOnClickListener(v -> onApplyClick());
+        backButton.setOnClickListener(v -> onBackClick());
+        radioCheckView.setOnClickListener(v -> onCheckViewClick());
+    }
+
+    private void onCheckViewClick() {
+        int currentItemPosition = viewPager.getCurrentItem();
+        ViewPagerItem viewPagerItem = viewPagerItemArrayList.get(currentItemPosition);
+        viewPagerItem.checked = !viewPagerItem.checked;
+
+        radioCheckView.setChecked(viewPagerItem.checked);
+
+        if (viewPagerItem.checked) {
+            int index = lstImageIDRemoved.indexOf(viewPagerItem.imageID);
+            lstImageIDRemoved.remove(index);
+        } else {
+            lstImageIDRemoved.add(viewPagerItem.imageID);
+        }
+
+        int countSelected = selectedFiles.size() - lstImageIDRemoved.size();
+        countSelectedTextView.setText(String.format("(%d)", countSelected));
     }
 
     private void onBackClick() {
@@ -112,11 +154,10 @@ public class PreviewActivity extends AppCompatActivity {
     }
 
     private class ViewPageAdapter extends RecyclerView.Adapter<ViewPageAdapter.ViewHolder> {
-        ArrayList<ViewPagerItem> viewPagerItemArrayList;
         ArrayList<ViewHolder> lstViewHolder = new ArrayList<>();
 
-        public ViewPageAdapter(ArrayList<ViewPagerItem> viewPagerItemArrayList) {
-            this.viewPagerItemArrayList = viewPagerItemArrayList;
+        public ViewPageAdapter(ArrayList<ViewPagerItem> viewPagerItemList) {
+            viewPagerItemArrayList = viewPagerItemList;
         }
 
         @NonNull
@@ -131,16 +172,6 @@ public class PreviewActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             ViewPagerItem viewPagerItem = viewPagerItemArrayList.get(position);
-            int visibility = (toolbarVisible) ? View.VISIBLE : View.INVISIBLE;
-
-            holder.imageID = viewPagerItem.imageID;
-            holder.positionList = (int)position;
-            holder.topToolbar.setVisibility(visibility);
-
-            if (holder.checked != viewPagerItem.checked) {
-                holder.checked = viewPagerItem.checked;
-                holder.radioCheckView.setChecked(holder.checked);
-            }
 
             Target mTarget = new Target() {
                 @Override
@@ -175,14 +206,7 @@ public class PreviewActivity extends AppCompatActivity {
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {
-            private RadioCheckView radioCheckView;
             private AppCompatImageView thumbnail;
-            private FrameLayout topToolbar;
-            private AppCompatImageView backButton;
-
-            private boolean checked = true;
-            private int imageID = 0;
-            private int positionList = 0;
             private boolean changeToolbarVisibility = false;
 
             public ViewHolder(@NonNull View itemView) {
@@ -193,34 +217,11 @@ public class PreviewActivity extends AppCompatActivity {
             }
 
             private void setViewVariables() {
-                radioCheckView = itemView.findViewById(R.id.check_view_preview);
                 thumbnail = itemView.findViewById(R.id.media_thumbnail_preview);
-                topToolbar = itemView.findViewById(R.id.top_toolbar_preview);
-                backButton = itemView.findViewById(R.id.back_button_preview);
             }
 
             private void setOnClickListener() {
-                this.radioCheckView.setOnClickListener(v -> onCheckViewClick());
                 this.thumbnail.setOnClickListener(v -> onThumbnailClick());
-                this.backButton.setOnClickListener(v -> onBackClick());
-            }
-
-            private void onCheckViewClick() {
-                checked = !checked;
-                ViewPagerItem viewPagerItem = viewPagerItemArrayList.get(positionList);
-                viewPagerItem.checked = checked;
-
-                this.radioCheckView.setChecked(checked);
-
-                if (checked) {
-                    int index = lstImageIDRemoved.indexOf(imageID);
-                    lstImageIDRemoved.remove(index);
-                } else {
-                    lstImageIDRemoved.add(imageID);
-                }
-
-                int countSelected = selectedFiles.size() - lstImageIDRemoved.size();
-                countSelectedTextView.setText(String.format("(%d)", countSelected));
             }
 
             private void onThumbnailClick() {
@@ -228,11 +229,8 @@ public class PreviewActivity extends AppCompatActivity {
                 changeToolbarVisibility = true;
 
                 int visibility = (toolbarVisible) ? View.INVISIBLE : View.VISIBLE;
-                for (int i = 0; i < lstViewHolder.size(); i++) {
-                    ViewHolder holder = lstViewHolder.get(i);
-                    holder.topToolbar.setVisibility(visibility);
-                }
                 bottomToolbar.setVisibility(visibility);
+                topToolbar.setVisibility(visibility);
 
                 toolbarVisible = !toolbarVisible;
                 changeToolbarVisibility = false;
