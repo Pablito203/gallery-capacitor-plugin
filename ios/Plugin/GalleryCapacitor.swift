@@ -55,7 +55,7 @@ import MobileCoreServices
     }
 
     public func getNameFromUrl(_ url: URL) -> String {
-        return url.lastPathComponent
+      return url.lastPathComponent.lowercased()
     }
 
     public func getSizeFromUrl(_ url: URL) throws -> Int {

@@ -6,6 +6,11 @@ public protocol PreviewControllerDelegate: AnyObject {
 }
 
 public class PreviewController : UIViewController {
+    lazy var topView = makeToolbarView()
+    lazy var backButton = makeBackButton()
+    lazy var radioImageView: UIImageView = self.makeImageView()
+    var radioChecked: Bool = true
+  
     lazy var bottomView = makeToolbarView()
     lazy var doneButton = makeDoneButton()
     lazy var collectionView: UICollectionView = self.makeCollectionView()
@@ -33,8 +38,42 @@ public class PreviewController : UIViewController {
     private func setup() {
         collectionView.backgroundColor = .black
         view.addSubview(collectionView)
+        self.setupTopView()
         self.setupBottomView()
     }
+  
+  
+    private func setupTopView() {
+      radioImageView.isUserInteractionEnabled = true
+      radioImageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(setCheckedAction)))
+      
+      [backButton, radioImageView].forEach {
+          topView.addSubview($0)
+      }
+
+      self.view.addSubview(topView)
+      
+      Constraint.on(
+          topView.leftAnchor.constraint(equalTo: topView.superview!.leftAnchor),
+          topView.rightAnchor.constraint(equalTo: topView.superview!.rightAnchor),
+          topView.topAnchor.constraint(equalTo: topView.superview!.topAnchor),
+          topView.heightAnchor.constraint(equalToConstant: 50 + Config.SafeArea.top),
+
+          backButton.widthAnchor.constraint(equalToConstant: 50),
+          backButton.heightAnchor.constraint(equalToConstant: 50),
+          radioImageView.widthAnchor.constraint(equalToConstant: 40),
+          radioImageView.heightAnchor.constraint(equalToConstant: 40)
+      )
+      
+      radioImageView.g_pin(on: .top, constant: Config.SafeArea.top + 5)
+      radioImageView.g_pin(on: .right, constant: -20)
+      backButton.g_pin(on: .top, constant: Config.SafeArea.top)
+      backButton.g_pin(on: .left)
+
+      radioImageView.layoutIfNeeded()
+      self.setChecked()
+    }
+
     
     private func setupBottomView() {
         [doneButton].forEach {
@@ -51,6 +90,14 @@ public class PreviewController : UIViewController {
         
         doneButton.g_pin(on: .top, constant: 10)
         doneButton.g_pin(on: .right, constant: -20)
+    }
+  
+    private func makeImageView() -> UIImageView {
+        let imageView = UIImageView()
+        imageView.clipsToBounds = true
+        imageView.contentMode = .scaleAspectFit
+
+        return imageView
     }
     
     private func makeDoneButton() -> UIButton {
@@ -90,6 +137,47 @@ public class PreviewController : UIViewController {
         view.backgroundColor = .black.withAlphaComponent(0.5)
         return view
     }
+  
+    private func makeBackButton() -> UIButton {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "chevron.left"), for: .normal)
+        button.addTarget(self, action: #selector(backAction), for: .touchUpInside)
+        button.tintColor = .white
+        
+        return button
+    }
+
+    private func setChecked() {
+        if radioChecked {
+            radioImageView.image = GalleryBundle.image("ic_radio_on")
+        } else {
+            radioImageView.image = GalleryBundle.image("ic_radio_off")
+        }
+    }
+  
+    @objc func backAction() {
+        self.dismiss(animated: false)
+    }
+    
+    @objc func setCheckedAction() {
+        radioChecked = !radioChecked
+        self.setChecked()
+      
+        let index = Int((collectionView.contentOffset.x + collectionView.bounds.width / 2) / collectionView.bounds.width)
+        let asset = assets[index]
+      
+        if !radioChecked  {
+            assetsToRemove.append(asset)
+        } else if let index = assetsToRemove.firstIndex(of: asset) {
+            assetsToRemove.remove(at: index)
+        }
+        
+        UIView.performWithoutAnimation {
+            self.doneButton.setTitle("Salvar (\(assets.count - assetsToRemove.count))", for: UIControl.State())
+            self.doneButton.layoutIfNeeded()
+        }
+    }
+
     
     @objc func doneAction() {
         for asset in assetsToRemove {
@@ -112,12 +200,7 @@ extension PreviewController: UICollectionViewDataSource, UICollectionViewDelegat
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: String(describing: PreviewCell.self), for: indexPath) as! PreviewCell
         
         let asset = assets[(indexPath as NSIndexPath).item]
-        cell.configure(asset, !assetsToRemove.contains(asset), self)
-        if (showToolbar) {
-            self.configureCellsAlpha(1)
-        } else {
-            self.configureCellsAlpha(0)
-        }
+        cell.configure(asset, self)
         return cell
     }
     
@@ -129,40 +212,28 @@ extension PreviewController: UICollectionViewDataSource, UICollectionViewDelegat
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
     }
-    
-    func configureCellsAlpha(_ alpha: CGFloat) {
-        for case let cell as PreviewCell in collectionView.visibleCells {
-            cell.topView.alpha = alpha
-        }
+}
+
+extension PreviewController: UICollectionViewDelegate {
+    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        let collectionView = scrollView as! UICollectionView
+        
+        let index = Int((collectionView.contentOffset.x + collectionView.bounds.width / 2) / collectionView.bounds.width)
+        let asset = assets[index]
+        self.radioChecked = !assetsToRemove.contains(asset)
+        self.setChecked()
     }
 }
 
 extension PreviewController: PreviewCellDelegate {
-    public func previewBack() {
-        self.dismiss(animated: false)
-    }
-    
-    public func previewChecked(_ asset: PHAsset, _ selected: Bool) {
-        if !selected  {
-            assetsToRemove.append(asset)
-        } else if let index = assetsToRemove.firstIndex(of: asset) {
-            assetsToRemove.remove(at: index)
-        }
-        
-        UIView.performWithoutAnimation {
-            self.doneButton.setTitle("Salvar (\(assets.count - assetsToRemove.count))", for: UIControl.State())
-            self.doneButton.layoutIfNeeded()
-        }
-    }
-    
     public func previewImageTap() {
         showToolbar = !showToolbar
         if !showToolbar {
             self.bottomView.alpha = 0
-            self.configureCellsAlpha(0)
+            self.topView.alpha = 0
         } else {
             self.bottomView.alpha = 1
-            self.configureCellsAlpha(1)
+            self.topView.alpha = 1
         }
     }
 }
