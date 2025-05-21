@@ -82,6 +82,13 @@
             "PickedFile"
           ],
           "type": "PickedFile[]"
+        },
+        {
+          "name": "warning",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "string | undefined"
         }
       ]
     },

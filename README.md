@@ -84,9 +84,10 @@ Required on Android only in android.
 
 #### PickFilesResult
 
-| Prop        | Type                      |
-| ----------- | ------------------------- |
-| **`files`** | <code>PickedFile[]</code> |
+| Prop          | Type                      |
+| ------------- | ------------------------- |
+| **`files`**   | <code>PickedFile[]</code> |
+| **`warning`** | <code>string</code>       |
 
 
 #### PickedFile
