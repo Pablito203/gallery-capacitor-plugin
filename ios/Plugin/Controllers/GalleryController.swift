@@ -3,7 +3,7 @@ import Photos
 import Combine
 
 public protocol GalleryControllerDelegate: AnyObject {
-    func galleryController(_ urls: [URL], _ controller: GalleryController)
+  func galleryController(_ urls: [URL], _ IcloudError: Bool, _ controller: GalleryController)
 }
 
 public class GalleryController : UIViewController {
@@ -19,6 +19,8 @@ public class GalleryController : UIViewController {
     
     public var cart = Cart()
     public weak var delegate: GalleryControllerDelegate?
+  
+    private var IcloudError = false
     
     public required init() {
         super.init(nibName: nil, bundle: nil)
@@ -189,42 +191,45 @@ public class GalleryController : UIViewController {
         var urls: [URL] = []
         let dispatchGroup = DispatchGroup()
         
-        for asset in cart.assets {
-            dispatchGroup.enter()
-            asset.requestContentEditingInput(with: nil, completionHandler: {(contentEditingInput, info) in
-                if let url = contentEditingInput?.fullSizeImageURL {
-                    if url.pathExtension.lowercased() == "heic" {
-                        if let convertedUrl = self.convertHeicToJpg(url) {
-                            urls.append(convertedUrl)
-                        }
-                    } else {
-                        urls.append(url)
-                    }
-                }
-                dispatchGroup.leave()
-            })
-        }
+      for asset in cart.assets {
+        dispatchGroup.enter()
+        let options = PHImageRequestOptions()
+        options.isSynchronous = false
+        options.isNetworkAccessAllowed = true
+        options.deliveryMode = .highQualityFormat
         
-        dispatchGroup.notify(queue: .main) {
-            completion(urls)
-        }
-    }
-    
-    private func convertHeicToJpg(_ url: URL) -> URL? {
-        do {
-            let imageData = try Data(contentsOf: url)
-            guard let image = UIImage(data: imageData) else {return nil}
-            guard let jpegData = image.jpegData(compressionQuality: 1.0) else {return nil}
-            
-            let tempDirectory = FileManager.default.temporaryDirectory
-            let jpegFileURL = tempDirectory.appendingPathComponent(UUID().uuidString + ".jpg")
-            do {
-                try jpegData.write(to: jpegFileURL)
-                return jpegFileURL
-            } catch {}
-        } catch {}
+        PHImageManager.default().requestImageDataAndOrientation(for: asset, options: options, resultHandler: {(data, uti, orientation, info) in
+          defer {
+              dispatchGroup.leave()
+          }
+          
+          if let info = info,
+             let isInCloud = info[PHImageResultIsInCloudKey] as? Bool,
+             isInCloud,
+             data == nil {
+              self.IcloudError = true
+              return
+          }
 
-        return nil
+          if let data = data {
+            let tempDir = FileManager.default.temporaryDirectory
+            let fileURL = tempDir.appendingPathComponent(UUID().uuidString).appendingPathExtension("jpg")
+            
+            if let image = UIImage(data: data),
+               let jpgData = image.jpegData(compressionQuality: 1.0) {
+              do {
+                try jpgData.write(to: fileURL)
+                urls.append(fileURL)
+              } catch {}
+            }
+          }
+          
+        })
+      }
+        
+      dispatchGroup.notify(queue: .main) {
+          completion(urls)
+      }
     }
     
     private func changeTopViewButtons(_ albumOpen: Bool) {
@@ -236,7 +241,7 @@ public class GalleryController : UIViewController {
     
     private func done() {
         getURLFromAssets() { urls in
-            self.delegate?.galleryController(urls, self)
+            self.delegate?.galleryController(urls, self.IcloudError, self)
         }
     }
     

@@ -69,6 +69,7 @@ public class ImagesController : UIViewController {
     func fetchImages() {
         let fetchOptions = PHFetchOptions()
         fetchOptions.predicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.image.rawValue)
+        fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
         
         let allAssets = PHAsset.fetchAssets(with: fetchOptions)
 
@@ -115,7 +116,7 @@ extension ImagesController: UICollectionViewDataSource, UICollectionViewDelegate
         } else {
             if cart.assets.count >= Config.maximumFilesCount {
                 let alert = UIAlertController(title: "Limite de \(Config.maximumFilesCount) arquivos",
-                                              message: "Voce pode selecionar ate \(Config.maximumFilesCount) arquivos",
+                                              message: "Você pode selecionar ate \(Config.maximumFilesCount) arquivos",
                                               preferredStyle: .alert)
                 let action = UIAlertAction(title: "OK", style: .default, handler: nil)
                 alert.addAction(action)

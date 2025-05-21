@@ -36,6 +36,7 @@ export interface PickFilesOptions {
 
 export interface PickFilesResult {
   files: PickedFile[];
+  warning: string | undefined
 }
 
 export interface PickedFile {

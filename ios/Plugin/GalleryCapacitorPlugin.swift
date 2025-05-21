@@ -12,6 +12,7 @@ public class GalleryCapacitorPlugin: CAPPlugin {
     public let errorUnknown = "Unknown error occurred."
     public let errorTemporaryCopyFailed = "An unknown error occurred while creating a temporary copy of the file."
     public let errorUnsupportedFileTypeIdentifier = "Unsupported file type identifier."
+    public let IcloudError = "error loading icloud images"
     public let pickerDismissedEvent = "pickerDismissed"
     private var implementation: GalleryCapacitor?
     private var savedCall: CAPPluginCall?
@@ -74,7 +75,7 @@ public class GalleryCapacitorPlugin: CAPPlugin {
         guard let savedCall = savedCall else {
             return
         }
-        if let error = error {
+        if let error = error, urls = nil {
             savedCall.reject(error)
             return
         }
@@ -95,6 +96,7 @@ public class GalleryCapacitorPlugin: CAPPlugin {
                 return file
             }
             result["files"] = filesResult
+            result["warning"] = error
             savedCall.resolve(result)
         } catch let error as NSError {
             savedCall.reject(error.localizedDescription, nil, error)
