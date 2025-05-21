@@ -97,7 +97,7 @@ extension GalleryCapacitor: GalleryControllerDelegate {
             }
         }
     
-        var error = IcloudError ? self.plugin?.errorTemporaryCopyFailed : nil
+        var error = IcloudError ? self.plugin?.IcloudError : nil
         self.plugin?.handleDocumentPickerResult(urls: temporaryUrls, error: error)
     }
 }

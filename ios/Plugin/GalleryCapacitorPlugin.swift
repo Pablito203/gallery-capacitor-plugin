@@ -75,7 +75,7 @@ public class GalleryCapacitorPlugin: CAPPlugin {
         guard let savedCall = savedCall else {
             return
         }
-        if let error = error, urls = nil {
+        if let error = error, urls == nil {
             savedCall.reject(error)
             return
         }
