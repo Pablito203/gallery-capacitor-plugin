@@ -212,8 +212,12 @@ public class GalleryController : UIViewController {
           }
 
           if let data = data {
+            let originalFilename = PHAssetResource.assetResources(for: asset).first?.originalFilename ?? "image.jpg"
+            let timestamp = Int(Date().timeIntervalSince1970)
+            let fileName = "\(timestamp)_\(originalFilename)"
+
             let tempDir = FileManager.default.temporaryDirectory
-            let fileURL = tempDir.appendingPathComponent(UUID().uuidString).appendingPathExtension("jpg")
+            let fileURL = tempDir.appendingPathComponent(fileName)
             
             if let image = UIImage(data: data),
                let jpgData = image.jpegData(compressionQuality: 1.0) {

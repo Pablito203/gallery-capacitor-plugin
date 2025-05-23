@@ -55,7 +55,11 @@ import MobileCoreServices
     }
 
     public func getNameFromUrl(_ url: URL) -> String {
-      return url.lastPathComponent.lowercased()
+        let components = url.lastPathComponent.lowercased().split(separator: "_", maxSplits: 1)
+        if components.count == 2 {
+          return String(components[1])
+        }
+        return String(components[0])
     }
 
     public func getSizeFromUrl(_ url: URL) throws -> Int {
