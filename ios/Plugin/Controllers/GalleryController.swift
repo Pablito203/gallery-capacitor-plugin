@@ -217,7 +217,7 @@ public class GalleryController : UIViewController {
             let fileName = "\(timestamp)_\(originalFilename)"
 
             let tempDir = FileManager.default.temporaryDirectory
-            let fileURL = tempDir.appendingPathComponent(fileName)
+            let fileURL = tempDir.appendingPathComponent(fileName).deletingPathExtension().appendingPathExtension("jpg")
             
             if let image = UIImage(data: data),
                let jpgData = image.jpegData(compressionQuality: 1.0) {
