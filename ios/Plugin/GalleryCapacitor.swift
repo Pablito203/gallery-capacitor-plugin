@@ -88,8 +88,14 @@ import MobileCoreServices
 }
 
 extension GalleryCapacitor: GalleryControllerDelegate {
-  public func galleryController(_ urls: [URL], _ IcloudError: Bool, _ controller: GalleryController) {
+  public func galleryController(_ urls: [URL]?, _ IcloudError: Bool, _ controller: GalleryController) {
         dismissViewController(controller)
+    
+        guard let urls = urls else {
+          self.plugin?.handleDocumentPickerResult(urls: nil, error: nil)
+            return
+        }
+    
         var temporaryUrls: [URL] = []
         for url in urls {
             do {

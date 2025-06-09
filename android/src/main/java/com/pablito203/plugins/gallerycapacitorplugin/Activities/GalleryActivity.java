@@ -47,6 +47,7 @@ public class GalleryActivity extends AppCompatActivity {
             return "";
         }
     }
+    private AppCompatImageView closeButton;
     private TextView buttonImages;
     private TextView buttonAlbuns;
     private TextView countSelectedTextView;
@@ -128,6 +129,8 @@ public class GalleryActivity extends AppCompatActivity {
 
         buttonApply.setOnClickListener(v -> applyClicked());
 
+        closeButton.setOnClickListener(v -> closeClicked());
+
         buttonImages.setOnClickListener(v -> addFragment(FragmentTags.IMAGES.getValue()));
 
         buttonAlbuns.setOnClickListener(v -> addFragment(FragmentTags.ALBUMS.getValue()));
@@ -197,6 +200,11 @@ public class GalleryActivity extends AppCompatActivity {
         toolbarMain.setVisibility(View.VISIBLE);
     }
 
+    public void closeClicked() {
+      setResult(RESULT_CANCELED);
+      finish();
+    }
+
     public void applyClicked() {
         Intent result = new Intent();
         ArrayList<Integer> lstImageID = new ArrayList<>(selectedFiles.keySet());
@@ -233,7 +241,7 @@ public class GalleryActivity extends AppCompatActivity {
                     return;
                 }
 
-                finish();
+                closeClicked();
             }
         });
     }
@@ -242,6 +250,7 @@ public class GalleryActivity extends AppCompatActivity {
         countSelectedTextView = (TextView) findViewById(R.id.count_selected);
         buttonPreview = (TextView) findViewById(R.id.button_preview);
         buttonApply = (LinearLayout) findViewById(R.id.button_apply);
+        closeButton = (AppCompatImageView) findViewById(R.id.close_button);
         buttonImages = (TextView) findViewById(R.id.images_button);
         buttonAlbuns = (TextView) findViewById(R.id.albuns_button);
         backButtonAlbum = (AppCompatImageView) findViewById(R.id.back_button_album);

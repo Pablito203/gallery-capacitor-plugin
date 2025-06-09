@@ -3,12 +3,13 @@ import Photos
 import Combine
 
 public protocol GalleryControllerDelegate: AnyObject {
-  func galleryController(_ urls: [URL], _ IcloudError: Bool, _ controller: GalleryController)
+  func galleryController(_ urls: [URL]?, _ IcloudError: Bool, _ controller: GalleryController)
 }
 
 public class GalleryController : UIViewController {
     lazy var topView = makeToolbarView()
     lazy var bottomView = makeToolbarView()
+    lazy var closeButton = makeCloseButton()
     lazy var imagesButton = makeImagesButton()
     lazy var albunsButton = makeAlbunsButton()
     lazy var doneButton = makeDoneButton()
@@ -45,7 +46,7 @@ public class GalleryController : UIViewController {
     }
     
     private func setupTopView() {
-        [imagesButton, albunsButton, backButton, albumLabel].forEach {
+        [closeButton, imagesButton, albunsButton, backButton, albumLabel].forEach {
             topView.addSubview($0)
         }
         self.view.addSubview(topView)
@@ -56,16 +57,20 @@ public class GalleryController : UIViewController {
             topView.topAnchor.constraint(equalTo: topView.superview!.topAnchor),
             topView.heightAnchor.constraint(equalToConstant: 50 + Config.SafeArea.top),
             
-            imagesButton.widthAnchor.constraint(equalTo: topView.widthAnchor, multiplier: 0.5),
-            albunsButton.widthAnchor.constraint(equalTo: topView.widthAnchor, multiplier: 0.5),
+            closeButton.widthAnchor.constraint(equalToConstant: 50),
+            closeButton	.heightAnchor.constraint(equalToConstant: 35),
+            imagesButton.widthAnchor.constraint(equalTo: topView.widthAnchor, multiplier: 0.43),
+            albunsButton.widthAnchor.constraint(equalTo: topView.widthAnchor, multiplier: 0.43),
             backButton.widthAnchor.constraint(equalToConstant: 50),
             backButton.heightAnchor.constraint(equalToConstant: 50),
             albumLabel.widthAnchor.constraint(equalTo: topView.widthAnchor, constant: -50),
             albumLabel.heightAnchor.constraint(equalToConstant: 50)
         )
         
+        closeButton.g_pin(on: .top, constant: Config.SafeArea.top)
+        closeButton.g_pin(on: .left)
         imagesButton.g_pin(on: .top, constant: Config.SafeArea.top)
-        imagesButton.g_pin(on: .left)
+        imagesButton.g_pin(on: .left, view: closeButton, on: .right)
         albunsButton.g_pin(on: .top, constant: Config.SafeArea.top)
         albunsButton.g_pin(on: .right)
         backButton.g_pin(on: .top, constant: Config.SafeArea.top)
@@ -186,6 +191,15 @@ public class GalleryController : UIViewController {
         
         return button
     }
+  
+  private func makeCloseButton() -> UIButton {
+      let button = UIButton(type: .system)
+      button.setImage(UIImage(systemName: "xmark"), for: .normal)
+      button.addTarget(self, action: #selector(closeAction), for: .touchUpInside)
+      button.tintColor = .white
+      
+      return button
+  }
     
     private func getURLFromAssets(_ completion: @escaping ([URL]) -> Void) {
         var urls: [URL] = []
@@ -241,6 +255,7 @@ public class GalleryController : UIViewController {
         albumLabel.isHidden = !albumOpen
         imagesButton.isHidden = albumOpen
         albunsButton.isHidden = albumOpen
+        closeButton.isHidden = albumOpen
     }
     
     private func done() {
@@ -273,6 +288,10 @@ public class GalleryController : UIViewController {
         let previewController = PreviewController(cart.assets)
         previewController.delegate = self
         self.present(previewController, animated: false)
+    }
+  
+    @objc func closeAction() {
+        self.delegate?.galleryController(nil, false, self)
     }
 }
 
