@@ -22,6 +22,7 @@ import com.getcapacitor.annotation.PermissionCallback;
 import com.pablito203.plugins.gallerycapacitorplugin.Activities.GalleryActivity;
 import com.pablito203.plugins.gallerycapacitorplugin.Utils.GalleryCapacitor;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -123,8 +124,18 @@ public class GalleryCapacitorPlugin extends Plugin {
             Uri uri = Uri.parse(stringr);
             JSObject fileResult = new JSObject();
 
-            fileResult.put("mimeType", implementation.getMimeTypeFromUri(uri));
-            fileResult.put("name", implementation.getNameFromUri(uri));
+            String fileName = implementation.getNameFromUri(uri);
+            String mimeType = implementation.getMimeTypeFromUri(uri);
+            if (mimeType.contains("heic")) {
+              try {
+                uri = implementation.convertHeicToJpg(uri);
+                mimeType = implementation.getMimeTypeFromUri(uri);
+                fileName = fileName.replace(".heic", ".jpg");
+              } catch (IOException e) {
+              }
+            }
+            fileResult.put("mimeType", mimeType);
+            fileResult.put("name", fileName);
             fileResult.put("path", implementation.getPathFromUri(uri));
             fileResult.put("size", implementation.getSizeFromUri(uri));
             filesResultList.add(fileResult);
